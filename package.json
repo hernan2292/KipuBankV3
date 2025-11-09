@@ -1,0 +1,36 @@
+{
+  "name": "kipubankv3",
+  "version": "1.0.0",
+  "description": "Advanced DeFi banking system with Uniswap V2 integration",
+  "author": "Kipu Team",
+  "license": "MIT",
+  "keywords": [
+    "defi",
+    "ethereum",
+    "uniswap",
+    "chainlink",
+    "smart-contracts",
+    "foundry",
+    "solidity"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/KipuBankV3.git"
+  },
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "test:coverage": "forge coverage",
+    "test:gas": "forge test --gas-report",
+    "deploy:sepolia": "forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 --rpc-url sepolia --broadcast --verify",
+    "deploy:mainnet": "forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 --rpc-url mainnet --broadcast --verify",
+    "format": "forge fmt",
+    "lint": "solhint 'src/**/*.sol' 'test/**/*.sol'",
+    "clean": "forge clean"
+  },
+  "devDependencies": {
+    "solhint": "^4.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-solidity": "^1.2.0"
+  }
+}
