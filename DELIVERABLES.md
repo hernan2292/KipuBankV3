@@ -39,7 +39,7 @@ The repository includes:
    cd /mnt/c/Users/herna/OneDrive/proyects/KipuBankV3
    forge test --gas-report
    ```
-3. **Deploy on Sepolia** when you’re ready:
+3. **Deploy on Sepolia** when you're ready:
    ```bash
    # Configure .env with your private key
    cp .env.example .env
@@ -136,7 +136,7 @@ https://sepolia.etherscan.io/address/<CONTRACT_ADDRESS>#code
 **Gas Savings vs KipuBankV2**:
 - depositETH(): 7.4% more efficient
 - withdraw(): 22.7% more efficient
-- Average: 12‑15% savings
+- Average: 12-15% savings
 
 ### 4. Code Quality
 - ✅ **NatSpec**: Full code documentation
@@ -159,15 +159,15 @@ https://sepolia.etherscan.io/address/<CONTRACT_ADDRESS>#code
 - ✅ Removes multi-token tracking
 - ✅ Better UX: single balance view
 
-**Trade‑off**:
+**Trade-off**:
 - ❌ Gas cost for swap on each deposit
-- ❌ USDC de‑peg risk
+- ❌ USDC de-peg risk
 - ❌ Slippage on large swaps
 
 **Mitigation**:
 - Configurable slippage tolerance
-- Emergency pause if USDC de‑peg
-- Future: multi‑stablecoin support
+- Emergency pause if USDC de-peg
+- Future: multi-stablecoin support
 
 ---
 
@@ -178,10 +178,10 @@ https://sepolia.etherscan.io/address/<CONTRACT_ADDRESS>#code
 **Reason**:
 - ✅ Simpler interface (less deployment gas)
 - ✅ Adequate liquidity for most pairs
-- ✅ Battle‑tested since 2020
+- ✅ Battle-tested since 2020
 - ✅ Lower integration complexity
 
-**Trade‑off**:
+**Trade-off**:
 - ❌ Worse pricing in some cases
 - ❌ No concentrated liquidity
 
@@ -196,9 +196,9 @@ https://sepolia.etherscan.io/address/<CONTRACT_ADDRESS>#code
 **Reason**:
 - ✅ More reliable and decentralized
 - ✅ High availability & update frequency
-- ✅ Battle‑tested in DeFi
+- ✅ Battle-tested in DeFi
 
-**Trade‑off**:
+**Trade-off**:
 - ❌ Single point of failure
 - ❌ Theoretical manipulation risk
 
@@ -217,13 +217,13 @@ https://sepolia.etherscan.io/address/<CONTRACT_ADDRESS>#code
 - ✅ Admin: critical operations (pause, emergency)
 - ✅ Manager: routine operations (tokens, caps)
 
-**Trade‑off**:
+**Trade-off**:
 - ❌ Governance complexity
 - ❌ Centralization risk
 
 **Recommendation**:
-- Admin should be a 3‑of‑5 multisig
-- 24‑48h timelock for critical changes
+- Admin should be a 3-of-5 multisig
+- 24-48h timelock for critical changes
 
 ---
 
@@ -248,11 +248,11 @@ balances[user] = userBalance - amount; // Single SSTORE
 - ✅ Each additional read costs 100 gas
 - ✅ Significant savings in complex functions
 
-**Trade‑off**:
+**Trade-off**:
 - ❌ Verbose code
 - ❌ Bug surface (forgetting to update cache)
 
-**Result**: 12‑15% average gas savings
+**Result**: 12-15% average gas savings
 
 ---
 
@@ -261,13 +261,13 @@ balances[user] = userBalance - amount; // Single SSTORE
 ### Implemented ✅
 
 1. **ReentrancyGuard** on all state-changing functions
-2. **CEI Pattern** (Checks‑Effects‑Interactions)
+2. **CEI Pattern** (Checks-Effects-Interactions)
 3. **AccessControl** with granular roles
 4. **Pausable** for emergencies
 5. **SafeERC20** for secure transfers
 6. **Oracle Validation** (staleness, validity)
 7. **Slippage Protection** configurable
-8. **Custom Errors** gas‑efficient
+8. **Custom Errors** gas-efficient
 9. **Input Validation** exhaustive
 
 ### Recommended for Mainnet ⚠️
@@ -276,8 +276,8 @@ balances[user] = userBalance - amount; // Single SSTORE
 2. **Circuit Breaker** on anomalous prices
 3. **Liquidity Validation** in Uniswap pools
 4. **Transfer Fee Protection** (balance check)
-5. **Multisig Admin** (3‑of‑5)
-6. **Timelock** (24‑48h) for critical changes
+5. **Multisig Admin** (3-of-5)
+6. **Timelock** (24-48h) for critical changes
 7. **External Audit** professional
 8. **Bug Bounty** on Immunefi
 
@@ -435,7 +435,7 @@ See **DEPLOYMENT.md** and **QUICKSTART.md** for more details.
 - [x] Pausable
 - [x] Input validation
 - [x] CEI pattern
-- [ ] External audit (pending pre‑mainnet)
+- [ ] External audit (pending pre-mainnet)
 
 ---
 
@@ -447,12 +447,12 @@ See **DEPLOYMENT.md** and **QUICKSTART.md** for more details.
 3. ⚠️ Deploy on Sepolia when ready
 4. ⚠️ Submit Etherscan URL after deployment
 
-### Short‑Term (1‑2 Weeks)
+### Short-Term (1-2 Weeks)
 5. [ ] Beta testing with real users on Sepolia
 6. [ ] Implement critical recommendations from THREAT_ANALYSIS.md
 7. [ ] Increase test coverage to >90%
 
-### Medium‑Term (1‑2 Months)
+### Medium-Term (1-2 Months)
 8. [ ] Professional audit (Code4rena, OpenZeppelin)
 9. [ ] Bug bounty on Immunefi
 10. [ ] Consider Sepolia deployment
@@ -493,7 +493,7 @@ The repository contains:
 3. Deploy on Sepolia
 4. Provide Etherscan URL
 
-**Estimated Time**: 30‑60 minutes
+**Estimated Time**: 30-60 minutes
 
 **Command**:
 ```bash
@@ -507,7 +507,7 @@ forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
 **Ready for Testnet**: ✅ YES
 **Ready for Mainnet**: ⚠️ Requires audit
 
-**Date**: 2025‑11‑09
+**Date**: 2025-11-09
 **Version**: 1.0.0
 **Author**: Hernan Herrera
 **Organization**: White Paper

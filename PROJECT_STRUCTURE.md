@@ -1,10 +1,10 @@
-# KipuBankV3 - Estructura del Proyecto
+# KipuBankV3 - Project Structure
 
-**Autor**: Hernan Herrera
-**Organización**: White Paper
-**Fecha**: 2025-11-09
+**Author**: Hernan Herrera
+**Organization**: White Paper
+**Date**: 2025-11-09
 
-## 📁 Estructura Completa de Archivos
+## 📁 Complete File Structure
 
 ```
 KipuBankV3/
@@ -13,148 +13,148 @@ KipuBankV3/
 │   └── workflows/
 │       └── ci.yml                      # GitHub Actions CI/CD pipeline
 │
-├── src/                                # Contratos Solidity
-│   ├── KipuBankV3.sol                 # 🏦 Contrato principal (800+ líneas)
-│   │                                   # - Depósitos ETH/ERC20
-│   │                                   # - Swap automático via Uniswap V2
-│   │                                   # - Gestión de bank cap
-│   │                                   # - Roles Admin/Manager
+├── src/                                # Solidity Contracts
+│   ├── KipuBankV3.sol                 # 🏦 Main contract (800+ lines)
+│   │                                   # - ETH/ERC20 deposits
+│   │                                   # - Automatic swap via Uniswap V2
+│   │                                   # - Bank cap management
+│   │                                   # - Admin/Manager roles
 │   │
 │   ├── interfaces/                     # Interfaces
-│   │   ├── IKipuBankV3.sol            # Interface principal del banco
-│   │   │                               # - Definición de funciones públicas
-│   │   │                               # - Eventos y errores custom
-│   │   │                               # - Estructuras de datos (TokenInfo)
+│   │   ├── IKipuBankV3.sol            # Main bank interface
+│   │   │                               # - Public function definition
+│   │   │                               # - Custom events and errors
+│   │   │                               # - Data structures (TokenInfo)
 │   │   │
-│   │   └── IUniswapV2Router02.sol     # Interface Uniswap V2 Router
+│   │   └── IUniswapV2Router02.sol     # Uniswap V2 Router interface
 │   │                                   # - swapExactTokensForTokens
 │   │                                   # - swapExactETHForTokens
 │   │                                   # - getAmountsOut
 │   │
-│   └── mocks/                          # Contratos mock para testing
-│       ├── MockERC20.sol               # Token ERC20 de prueba
-│       ├── MockV3Aggregator.sol        # Oracle Chainlink mock
-│       └── MockUniswapV2Router.sol     # Router Uniswap V2 mock
+│   └── mocks/                          # Mock contracts for testing
+│       ├── MockERC20.sol               # Test ERC20 token
+│       ├── MockV3Aggregator.sol        # Mock Chainlink oracle
+│       └── MockUniswapV2Router.sol     # Mock Uniswap V2 router
 │
-├── test/                               # Tests con Foundry
-│   └── KipuBankV3.t.sol               # 🧪 Suite completa de tests (65+ tests)
+├── test/                               # Tests with Foundry
+│   └── KipuBankV3.t.sol               # 🧪 Complete test suite (65+ tests)
 │                                       # - Unit tests
 │                                       # - Integration tests
 │                                       # - Fuzz tests
 │                                       # - Coverage: ~78%
 │
-├── script/                             # Scripts de deployment
-│   └── DeployKipuBankV3.s.sol         # 🚀 Script de deployment
+├── script/                             # Deployment scripts
+│   └── DeployKipuBankV3.s.sol         # 🚀 Deployment script
 │                                       # - Sepolia configuration
 │                                       # - Mainnet configuration
 │                                       # - Auto-verification
 │
-├── lib/                                # Dependencias externas (git submodules)
+├── lib/                                # External dependencies (git submodules)
 │   ├── openzeppelin-contracts/        # OpenZeppelin (v5.0.0)
 │   ├── chainlink/                      # Chainlink contracts
 │   └── forge-std/                      # Forge standard library
 │
-├── .vscode/                            # Configuración VSCode
+├── .vscode/                            # VSCode configuration
 │
 ├── .github/                            # GitHub configuration
 │   └── workflows/                      # CI/CD pipelines
 │
-├── cache/                              # Cache de compilación (gitignored)
-├── out/                                # Artifacts compilados (gitignored)
-├── broadcast/                          # Logs de deployment (gitignored)
+├── cache/                              # Compilation cache (gitignored)
+├── out/                                # Compiled artifacts (gitignored)
+├── broadcast/                          # Deployment logs (gitignored)
 │
-├── 📄 README.md                        # 📚 Documentación principal (1,400+ líneas)
-│                                       # - Resumen ejecutivo
-│                                       # - Arquitectura del sistema
-│                                       # - Guía de instalación
-│                                       # - Interacción con el contrato
-│                                       # - Análisis de amenazas
-│                                       # - Decisiones de diseño
+├── 📄 README.md                        # 📚 Main documentation (1,400+ lines)
+│                                       # - Executive summary
+│                                       # - System architecture
+│                                       # - Installation guide
+│                                       # - Contract interaction
+│                                       # - Threat analysis
+│                                       # - Design decisions
 │
-├── 📄 DEPLOYMENT.md                    # 🚀 Guía de deployment (700+ líneas)
-│                                       # - Setup paso a paso
-│                                       # - Deployment Sepolia/Mainnet
+├── 📄 DEPLOYMENT.md                    # 🚀 Deployment guide (700+ lines)
+│                                       # - Step-by-step setup
+│                                       # - Sepolia/Mainnet deployment
 │                                       # - Post-deployment testing
 │                                       # - Troubleshooting
 │
-├── 📄 QUICKSTART.md                    # ⚡ Inicio rápido (300+ líneas)
-│                                       # - Setup en 5 minutos
-│                                       # - Ejemplos prácticos
+├── 📄 QUICKSTART.md                    # ⚡ Quick start (300+ lines)
+│                                       # - 5-minute setup
+│                                       # - Practical examples
 │                                       # - FAQ
 │
-├── 📄 SECURITY.md                      # 🔒 Política de seguridad (200+ líneas)
-│                                       # - Reporte de vulnerabilidades
+├── 📄 SECURITY.md                      # 🔒 Security policy (200+ lines)
+│                                       # - Vulnerability reporting
 │                                       # - Bug bounty program
-│                                       # - Issues conocidos
+│                                       # - Known issues
 │
-├── 📄 IMPLEMENTATION_SUMMARY.md        # ✅ Resumen de implementación
-│                                       # - Cumplimiento de objetivos
-│                                       # - Decisiones técnicas
-│                                       # - Métricas del proyecto
+├── 📄 IMPLEMENTATION_SUMMARY.md        # ✅ Implementation summary
+│                                       # - Objectives compliance
+│                                       # - Technical decisions
+│                                       # - Project metrics
 │
-├── 📄 PROJECT_STRUCTURE.md             # 📁 Este archivo
-│                                       # - Estructura del proyecto
-│                                       # - Descripción de archivos
+├── 📄 PROJECT_STRUCTURE.md             # 📁 This file
+│                                       # - Project structure
+│                                       # - File description
 │
-├── 📄 foundry.toml                     # ⚙️ Configuración Foundry
+├── 📄 foundry.toml                     # ⚙️ Foundry configuration
 │                                       # - Compiler settings
 │                                       # - RPC endpoints
 │                                       # - Optimizer config
 │
-├── 📄 remappings.txt                   # 🔗 Remappings de imports
+├── 📄 remappings.txt                   # 🔗 Import remappings
 │                                       # - @openzeppelin → lib/openzeppelin-contracts
 │                                       # - @chainlink → lib/chainlink
 │
-├── 📄 Makefile                         # 🛠️ Comandos útiles
+├── 📄 Makefile                         # 🛠️ Useful commands
 │                                       # - make install, build, test
 │                                       # - make deploy-sepolia, deploy-mainnet
 │                                       # - make coverage, gas-report
 │
-├── 📄 package.json                     # 📦 Metadatos del proyecto
-│                                       # - Scripts npm
-│                                       # - Dependencias de desarrollo
+├── 📄 package.json                     # 📦 Project metadata
+│                                       # - npm scripts
+│                                       # - Development dependencies
 │
-├── 📄 .env.example                     # 🔐 Template de variables de entorno
+├── 📄 .env.example                     # 🔐 Environment variables template
 │                                       # - RPC URLs
 │                                       # - Private key (placeholder)
 │                                       # - Etherscan API key
 │
-├── 📄 .gitignore                       # 🚫 Archivos ignorados por Git
+├── 📄 .gitignore                       # 🚫 Files ignored by Git
 │                                       # - cache/, out/, broadcast/
-│                                       # - .env (CRÍTICO)
+│                                       # - .env (CRITICAL)
 │                                       # - node_modules/
 │
-├── 📄 .gitattributes                   # 📝 Atributos de Git
+├── 📄 .gitattributes                   # 📝 Git attributes
 │                                       # - EOL normalization
 │                                       # - Binary files handling
 │
-└── 📄 LICENSE                          # ⚖️ Licencia MIT
+└── 📄 LICENSE                          # ⚖️ MIT License
 ```
 
 ---
 
-## 🎯 Archivos Clave por Categoría
+## 🎯 Key Files by Category
 
-### 🏗️ Smart Contracts (Producción)
+### 🏗️ Smart Contracts (Production)
 
-| Archivo | Líneas | Descripción | Propósito |
+| File | Lines | Description | Purpose |
 |---------|--------|-------------|-----------|
-| `src/KipuBankV3.sol` | 800+ | Contrato principal | Core banking logic, swaps, bank cap |
-| `src/interfaces/IKipuBankV3.sol` | 200+ | Interface principal | Definición de funciones públicas |
-| `src/interfaces/IUniswapV2Router02.sol` | 80+ | Interface Uniswap | Integración con Uniswap V2 |
+| `src/KipuBankV3.sol` | 800+ | Main contract | Core banking logic, swaps, bank cap |
+| `src/interfaces/IKipuBankV3.sol` | 200+ | Main interface | Public function definition |
+| `src/interfaces/IUniswapV2Router02.sol` | 80+ | Uniswap interface | Integration with Uniswap V2 |
 
 ### 🧪 Testing
 
-| Archivo | Líneas | Tests | Cobertura |
+| File | Lines | Tests | Coverage |
 |---------|--------|-------|-----------|
 | `test/KipuBankV3.t.sol` | 600+ | 65+ | ~78% |
 | `src/mocks/MockERC20.sol` | 30+ | - | Mock token |
 | `src/mocks/MockV3Aggregator.sol` | 60+ | - | Mock oracle |
 | `src/mocks/MockUniswapV2Router.sol` | 130+ | - | Mock router |
 
-### 📚 Documentación
+### 📚 Documentation
 
-| Archivo | Líneas | Palabras | Audiencia |
+| File | Lines | Words | Audience |
 |---------|--------|----------|-----------|
 | `README.md` | 1,400+ | 12,000+ | Developers, Auditors, Users |
 | `DEPLOYMENT.md` | 700+ | 6,000+ | DevOps, Deployers |
@@ -162,98 +162,98 @@ KipuBankV3/
 | `SECURITY.md` | 200+ | 1,800+ | Security Researchers |
 | `IMPLEMENTATION_SUMMARY.md` | 500+ | 4,000+ | Evaluators, Technical Review |
 
-### 🛠️ Configuración y Scripts
+### 🛠️ Configuration and Scripts
 
-| Archivo | Propósito |
+| File | Purpose |
 |---------|-----------|
-| `foundry.toml` | Configuración de Foundry (compiler, optimizer, RPC) |
-| `remappings.txt` | Remappings de imports de librerías |
-| `Makefile` | Comandos útiles (test, deploy, coverage) |
-| `package.json` | Metadatos y scripts npm |
-| `.env.example` | Template de variables de entorno |
-| `script/DeployKipuBankV3.s.sol` | Script de deployment automatizado |
+| `foundry.toml` | Foundry configuration (compiler, optimizer, RPC) |
+| `remappings.txt` | Library import remappings |
+| `Makefile` | Useful commands (test, deploy, coverage) |
+| `package.json` | Metadata and npm scripts |
+| `.env.example` | Environment variables template |
+| `script/DeployKipuBankV3.s.sol` | Automated deployment script |
 
-### 🔒 Seguridad y CI/CD
+### 🔒 Security and CI/CD
 
-| Archivo | Propósito |
+| File | Purpose |
 |---------|-----------|
-| `.github/workflows/ci.yml` | Pipeline de CI/CD (build, test, lint) |
-| `SECURITY.md` | Política de divulgación de vulnerabilidades |
-| `.gitignore` | Protección de archivos sensibles (.env) |
+| `.github/workflows/ci.yml` | CI/CD pipeline (build, test, lint) |
+| `SECURITY.md` | Vulnerability disclosure policy |
+| `.gitignore` | Protection of sensitive files (.env) |
 
 ---
 
-## 📊 Estadísticas del Proyecto
+## 📊 Project Statistics
 
-### Código Solidity
+### Solidity Code
 
 ```
-Contratos Principales:    800+ líneas
-Interfaces:               280+ líneas
-Mocks:                    220+ líneas
-Tests:                    600+ líneas
-Scripts:                   70+ líneas
+Main Contracts:          800+ lines
+Interfaces:              280+ lines
+Mocks:                   220+ lines
+Tests:                   600+ lines
+Scripts:                  70+ lines
 ─────────────────────────────────────
-TOTAL SOLIDITY:          ~2000 líneas
+TOTAL SOLIDITY:         ~2000 lines
 ```
 
-### Documentación
+### Documentation
 
 ```
-README.md:              1,400+ líneas
-DEPLOYMENT.md:            700+ líneas
-QUICKSTART.md:            300+ líneas
-SECURITY.md:              200+ líneas
-IMPLEMENTATION_SUMMARY:   500+ líneas
-PROJECT_STRUCTURE:        200+ líneas
+README.md:              1,400+ lines
+DEPLOYMENT.md:            700+ lines
+QUICKSTART.md:            300+ lines
+SECURITY.md:              200+ lines
+IMPLEMENTATION_SUMMARY:   500+ lines
+PROJECT_STRUCTURE:        200+ lines
 ─────────────────────────────────────
-TOTAL DOCS:             ~3300 líneas
+TOTAL DOCS:             ~3300 lines
 ```
 
 ### Tests
 
 ```
 Total Tests:               65+
-Cobertura:                 78%
-Líneas de Test Code:      600+
+Coverage:                  78%
+Test Code Lines:          600+
 Test Categories:           10
 ```
 
 ---
 
-## 🔍 Mapa de Navegación Rápida
+## 🔍 Quick Navigation Map
 
-### Para Auditors
+### For Auditors
 
-1. **Start**: [README.md](README.md) - Sección "Arquitectura del Sistema"
-2. **Code**: [src/KipuBankV3.sol](src/KipuBankV3.sol) - Contrato principal con NatSpec
-3. **Security**: [README.md](README.md) - Sección "Análisis de Amenazas"
-4. **Tests**: [test/KipuBankV3.t.sol](test/KipuBankV3.t.sol) - Suite completa
+1. **Start**: [README.md](README.md) - "System Architecture" Section
+2. **Code**: [src/KipuBankV3.sol](src/KipuBankV3.sol) - Main contract with NatSpec
+3. **Security**: [README.md](README.md) - "Threat Analysis" Section
+4. **Tests**: [test/KipuBankV3.t.sol](test/KipuBankV3.t.sol) - Complete suite
 
-### Para Developers Frontend
+### For Frontend Developers
 
-1. **Start**: [QUICKSTART.md](QUICKSTART.md) - Setup en 5 minutos
-2. **API**: [src/interfaces/IKipuBankV3.sol](src/interfaces/IKipuBankV3.sol) - Funciones públicas
-3. **Examples**: [README.md](README.md) - Sección "Interacción con el Contrato"
-4. **Addresses**: Agregar después del deployment
+1. **Start**: [QUICKSTART.md](QUICKSTART.md) - 5-minute setup
+2. **API**: [src/interfaces/IKipuBankV3.sol](src/interfaces/IKipuBankV3.sol) - Public functions
+3. **Examples**: [README.md](README.md) - "Contract Interaction" Section
+4. **Addresses**: Add after deployment
 
-### Para DevOps
+### For DevOps
 
-1. **Start**: [DEPLOYMENT.md](DEPLOYMENT.md) - Guía completa
+1. **Start**: [DEPLOYMENT.md](DEPLOYMENT.md) - Complete guide
 2. **Config**: [foundry.toml](foundry.toml) + [.env.example](.env.example)
 3. **Script**: [script/DeployKipuBankV3.s.sol](script/DeployKipuBankV3.s.sol)
 4. **CI/CD**: [.github/workflows/ci.yml](.github/workflows/ci.yml)
 
-### Para Evaluadores del Examen
+### For Exam Evaluators
 
 1. **Start**: [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
 2. **Code**: [src/KipuBankV3.sol](src/KipuBankV3.sol)
 3. **Tests**: `forge test` + `forge coverage`
-4. **Docs**: [README.md](README.md) - Análisis de amenazas
+4. **Docs**: [README.md](README.md) - Threat analysis
 
 ---
 
-## 🎨 Convenciones de Código
+## 🎨 Code Conventions
 
 ### Naming Conventions
 
@@ -264,7 +264,7 @@ address public immutable usdc;          // camelCase
 
 // Functions
 function depositETH() external          // camelCase
-function _getETHPrice() internal        // _prefijo para internal/private
+function _getETHPrice() internal        // _prefix for internal/private
 
 // Constants
 uint256 public constant MAX_BPS = 10000;  // UPPER_SNAKE_CASE
@@ -279,7 +279,7 @@ error BankCapExceeded();                // PascalCase
 bytes32 public constant MANAGER_ROLE    // UPPER_SNAKE_CASE
 ```
 
-### Comentarios
+### Comments
 
 ```solidity
 /// @notice - User-facing description
@@ -288,7 +288,7 @@ bytes32 public constant MANAGER_ROLE    // UPPER_SNAKE_CASE
 /// @return - Return value description
 ```
 
-### Estructura de Funciones
+### Function Structure
 
 ```solidity
 function exampleFunction()
@@ -307,22 +307,22 @@ function exampleFunction()
 
 ---
 
-## 🚀 Flujo de Trabajo Recomendado
+## 🚀 Recommended Workflow
 
-### Para Desarrollo
+### For Development
 
 ```bash
-# 1. Clonar e instalar
+# 1. Clone and install
 git clone <repo>
 make install
 
-# 2. Crear branch
+# 2. Create branch
 git checkout -b feature/my-feature
 
-# 3. Desarrollar
-# Editar src/KipuBankV3.sol
+# 3. Develop
+# Edit src/KipuBankV3.sol
 
-# 4. Compilar
+# 4. Compile
 make build
 
 # 5. Test
@@ -336,36 +336,36 @@ make format
 git add .
 git commit -m "feat: add feature X"
 
-# 8. Push y PR
+# 8. Push and PR
 git push origin feature/my-feature
 ```
 
-### Para Deployment
+### For Deployment
 
 ```bash
 # 1. Setup environment
 cp .env.example .env
-# Editar .env con tus keys
+# Edit .env with your keys
 
-# 2. Test en local
+# 2. Test locally
 anvil  # Terminal 1
 forge script script/DeployKipuBankV3.s.sol --rpc-url localhost --broadcast  # Terminal 2
 
-# 3. Deploy en testnet
+# 3. Deploy on testnet
 make deploy-sepolia
 
-# 4. Verificar deployment
+# 4. Verify deployment
 cast call <ADDRESS> "bankCapUSD()(uint256)" --rpc-url sepolia
 
-# 5. Test post-deployment
-# Ver DEPLOYMENT.md sección "Testing Post-Deployment"
+# 5. Post-deployment test
+# See DEPLOYMENT.md section "Testing Post-Deployment"
 ```
 
 ---
 
-## 📚 Recursos Adicionales
+## 📚 Additional Resources
 
-### Dependencias Externas
+### External Dependencies
 
 - **OpenZeppelin Contracts**: https://docs.openzeppelin.com/contracts/
 - **Chainlink Data Feeds**: https://docs.chain.link/data-feeds
@@ -381,19 +381,19 @@ cast call <ADDRESS> "bankCapUSD()(uint256)" --rpc-url sepolia
 
 ---
 
-## ✅ Checklist para Contribuidores
+## ✅ Contributor Checklist
 
-Antes de hacer un PR, verifica:
+Before making a PR, verify:
 
-- [ ] Código compila sin warnings: `make build`
-- [ ] Tests pasan: `make test`
-- [ ] Cobertura >= 75%: `make coverage`
-- [ ] Código formateado: `make format`
-- [ ] NatSpec completo en funciones públicas
-- [ ] Gas optimizado (no storage reads innecesarios)
+- [ ] Code compiles without warnings: `make build`
+- [ ] Tests pass: `make test`
+- [ ] Coverage >= 75%: `make coverage`
+- [ ] Code formatted: `make format`
+- [ ] Complete NatSpec on public functions
+- [ ] Gas optimized (no unnecessary storage reads)
 - [ ] Security checks (ReentrancyGuard, CEI pattern)
-- [ ] Documentación actualizada si cambios en API
+- [ ] Documentation updated if API changes
 
 ---
 
-**Este proyecto es un ejemplo de excelencia en desarrollo Solidity con Foundry.** 🏆
+**This project is an example of excellence in Solidity development with Foundry.** 🏆

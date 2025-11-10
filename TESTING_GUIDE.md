@@ -1,23 +1,23 @@
-# Guía de Testing - KipuBankV3
+# Testing Guide - KipuBankV3
 
-**Autor**: Hernan Herrera
-**Organización**: White Paper
-**Fecha**: 2025-11-09
+**Author**: Hernan Herrera
+**Organization**: White Paper
+**Date**: 2025-11-09
 
-Esta guía te ayudará a ejecutar todos los tests y análisis de gas del proyecto.
+This guide will help you run all tests and gas analysis for the project.
 
 ---
 
-## 📋 Prerequisitos
+## 📋 Prerequisites
 
-### 1. Instalar Foundry
+### 1. Install Foundry
 
 ```bash
-# Instalar Foundry
+# Install Foundry
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
-# Verificar instalación
+# Verify installation
 forge --version
 cast --version
 anvil --version
@@ -25,15 +25,15 @@ anvil --version
 
 ---
 
-## 🧪 Ejecutar Tests
+## 🧪 Running Tests
 
-### Tests Básicos
+### Basic Tests
 
 ```bash
-# Ejecutar todos los tests
+# Run all tests
 forge test
 
-# Output esperado:
+# Expected output:
 # Running 65 tests for test/KipuBankV3.t.sol:KipuBankV3Test
 # [PASS] test_AddToken_Success() (gas: 54432)
 # [PASS] test_Constructor_Success() (gas: 1234567)
@@ -41,62 +41,62 @@ forge test
 # Test result: ok. 65 passed; 0 failed; finished in 1.23s
 ```
 
-### Tests con Verbosidad
+### Tests with Verbosity
 
 ```bash
-# Nivel 1: Mostrar errores
+# Level 1: Show errors
 forge test -v
 
-# Nivel 2: Mostrar logs
+# Level 2: Show logs
 forge test -vv
 
-# Nivel 3: Mostrar stack traces
+# Level 3: Show stack traces
 forge test -vvv
 
-# Nivel 4: Mostrar setup traces
+# Level 4: Show setup traces
 forge test -vvvv
 
-# Nivel 5: Mostrar todo
+# Level 5: Show everything
 forge test -vvvvv
 ```
 
-### Tests Específicos
+### Specific Tests
 
 ```bash
-# Ejecutar solo tests de depósitos
+# Run only deposit tests
 forge test --match-test "Deposit"
 
-# Ejecutar solo tests de retiros
+# Run only withdrawal tests
 forge test --match-test "Withdraw"
 
-# Ejecutar un test específico
+# Run a specific test
 forge test --match-test "test_DepositETH_Success"
 
-# Ejecutar tests que NO contengan un patrón
+# Run tests that do NOT contain a pattern
 forge test --no-match-test "Fuzz"
 ```
 
-### Tests por Contrato
+### Tests by Contract
 
 ```bash
-# Ejecutar solo tests de KipuBankV3Test
+# Run only KipuBankV3Test tests
 forge test --match-contract KipuBankV3Test
 
-# Ejecutar tests de múltiples contratos
+# Run tests from multiple contracts
 forge test --match-contract "KipuBank|Mock"
 ```
 
 ---
 
-## ⛽ Análisis de Gas
+## ⛽ Gas Analysis
 
-### Reporte Básico de Gas
+### Basic Gas Report
 
 ```bash
-# Generar reporte de gas
+# Generate gas report
 forge test --gas-report
 
-# Output esperado:
+# Expected output:
 # ╭─────────────────────────────────────────────────────────────╮
 # │ KipuBankV3 contract                                         │
 # ├─────────────────────────────┬─────────────────────────────┤
@@ -109,68 +109,68 @@ forge test --gas-report
 # ╰─────────────────────────────┴─────────────────────────────╯
 ```
 
-### Reporte de Gas en Archivo
+### Gas Report to File
 
 ```bash
-# Guardar reporte completo
+# Save complete report
 forge test --gas-report > gas-report.txt
 
-# Ver reporte
+# View report
 cat gas-report.txt
 
-# O con paginación
+# Or with pagination
 less gas-report.txt
 ```
 
 ### Gas Snapshot
 
 ```bash
-# Crear snapshot de gas
+# Create gas snapshot
 forge snapshot
 
-# Esto crea .gas-snapshot con:
+# This creates .gas-snapshot with:
 # test_DepositETH_Success() (gas: 213045)
 # test_DepositToken_USDC_Success() (gas: 81523)
 # ...
 
-# Ver snapshot
+# View snapshot
 cat .gas-snapshot
 
-# Comparar con cambios
+# Compare with changes
 forge snapshot --diff
 
-# Output muestra cambios:
+# Output shows changes:
 # test_DepositETH_Success() (gas: 213045 → 210123) [-2922]
 # test_Withdraw_Success() (gas: 58234 → 57123) [-1111]
 ```
 
-### Gas con Diferentes Optimizaciones
+### Gas with Different Optimizations
 
 ```bash
-# Sin optimizer
+# Without optimizer
 forge test --gas-report --no-optimizer
 
-# Con optimizer (200 runs) - DEFAULT
+# With optimizer (200 runs) - DEFAULT
 forge test --gas-report --optimizer-runs 200
 
-# Con optimizer (1000 runs) - Para production
+# With optimizer (1000 runs) - For production
 forge test --gas-report --optimizer-runs 1000
 
-# Con optimizer (1 run) - Para deployment barato
+# With optimizer (1 run) - For cheap deployment
 forge test --gas-report --optimizer-runs 1
 ```
 
 ---
 
-## 📊 Coverage (Cobertura de Tests)
+## 📊 Coverage (Test Coverage)
 
-### Generar Reporte de Cobertura
+### Generate Coverage Report
 
 ```bash
-# Cobertura básica
+# Basic coverage
 forge coverage
 
-# Output esperado:
+# Expected output:
 # ╭─────────────────────────────────────────────────────────╮
 # │ File                    │ % Lines  │ % Statements │ ...│
 # ├─────────────────────────┼──────────┼──────────────┼────┤
@@ -179,30 +179,30 @@ forge coverage
 # ╰─────────────────────────┴──────────┴──────────────┴────╯
 ```
 
-### Cobertura Detallada con LCOV
+### Detailed Coverage with LCOV
 
 ```bash
-# Generar archivo LCOV
+# Generate LCOV file
 forge coverage --report lcov
 
-# Esto crea lcov.info
+# This creates lcov.info
 
-# Generar HTML (requiere lcov/genhtml)
+# Generate HTML (requires lcov/genhtml)
 genhtml lcov.info --output-directory coverage
 
-# Abrir en browser
+# Open in browser
 open coverage/index.html  # macOS
 xdg-open coverage/index.html  # Linux
 start coverage/index.html  # Windows
 ```
 
-### Cobertura por Archivo
+### Coverage by File
 
 ```bash
-# Ver cobertura solo de KipuBankV3.sol
+# View coverage only for KipuBankV3.sol
 forge coverage --report summary --match-path "src/KipuBankV3.sol"
 
-# Ver cobertura de tests específicos
+# View coverage for specific tests
 forge coverage --match-test "Deposit"
 ```
 
@@ -210,89 +210,89 @@ forge coverage --match-test "Deposit"
 
 ## 🔍 Debugging
 
-### Tests con Traces
+### Tests with Traces
 
 ```bash
-# Ver traces de ejecución
+# View execution traces
 forge test --match-test "test_DepositETH_Success" -vvvv
 
-# Ver traces con opcodes
+# View traces with opcodes
 forge test --match-test "test_DepositETH_Success" --debug
 
-# Esto abre debugger interactivo:
-# - Enter: siguiente step
+# This opens interactive debugger:
+# - Enter: next step
 # - 'q': quit
 # - 'c': continue
-# - 'j/k': navegar stack
+# - 'j/k': navigate stack
 ```
 
-### Tests con Fork
+### Tests with Fork
 
 ```bash
-# Ejecutar tests en fork de mainnet
+# Run tests on mainnet fork
 forge test --fork-url $MAINNET_RPC_URL
 
-# Ejecutar tests en fork de Sepolia
+# Run tests on Sepolia fork
 forge test --fork-url $SEPOLIA_RPC_URL
 
-# Fork en block específico
+# Fork at specific block
 forge test --fork-url $MAINNET_RPC_URL --fork-block-number 18000000
 ```
 
-### Tests con Logs
+### Tests with Logs
 
 ```bash
-# En tus tests, agregar:
+# In your tests, add:
 # import "forge-std/console.sol";
 # console.log("Balance:", balance);
 # console.log("User:", user);
 
-# Ejecutar con -vv para ver logs
+# Run with -vv to see logs
 forge test -vv
 ```
 
 ---
 
-## 🚀 Script de Análisis Completo
+## 🚀 Complete Analysis Script
 
-Usa el script incluido para análisis completo:
+Use the included script for complete analysis:
 
 ```bash
-# Hacer ejecutable
+# Make executable
 chmod +x test-gas.sh
 
-# Ejecutar
+# Execute
 ./test-gas.sh
 
 # Output:
 # ======================================
-#   KipuBankV3 - Análisis de Gas
+#   KipuBankV3 - Gas Analysis
 # ======================================
 #
-# [1/5] Compilando contratos...
-# ✓ Compilación exitosa
+# [1/5] Compiling contracts...
+# ✓ Compilation successful
 #
-# [2/5] Ejecutando tests...
-# ✓ Tests exitosos
+# [2/5] Running tests...
+# ✓ Tests successful
 #
-# [3/5] Generando reporte de gas...
-# ✓ Reporte generado: gas-report-full.txt
+# [3/5] Generating gas report...
+# ✓ Report generated: gas-report-full.txt
 #
-# [4/5] Generando snapshot de gas...
-# ✓ Snapshot generado: .gas-snapshot
+# [4/5] Generating gas snapshot...
+# ✓ Snapshot generated: .gas-snapshot
 #
-# [5/5] Resumen de Gas por Función
+# [5/5] Gas Summary by Function
 # ...
 ```
 
 ---
 
-## 📈 Tests de Integración
+## 📈 Integration Tests
 
-### Test con Anvil (Local)
+### Test with Anvil (Local)
 
 ```bash
-# Terminal 1: Iniciar Anvil
+# Terminal 1: Start Anvil
 anvil
 
 # Output:
@@ -302,131 +302,131 @@ anvil
 # (0) 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 (10000 ETH)
 # Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
-# Terminal 2: Deploy y test
+# Terminal 2: Deploy and test
 forge script script/DeployKipuBankV3.s.sol \
   --rpc-url http://127.0.0.1:8545 \
   --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
   --broadcast
 ```
 
-### Test en Sepolia
+### Test on Sepolia
 
 ```bash
-# Asegúrate de tener .env configurado
+# Make sure .env is configured
 source .env
 
-# Ejecutar tests en fork de Sepolia
+# Run tests on Sepolia fork
 forge test --fork-url $SEPOLIA_RPC_URL -vv
 ```
 
 ---
 
-## 🎯 Tests Específicos por Funcionalidad
+## 🎯 Specific Tests by Functionality
 
-### Tests de Depósitos
+### Deposit Tests
 
 ```bash
-# Todos los tests de depósitos
+# All deposit tests
 forge test --match-test "Deposit" --gas-report
 
-# Solo depósitos ETH
+# Only ETH deposits
 forge test --match-test "DepositETH" -vv
 
-# Solo depósitos Token
+# Only token deposits
 forge test --match-test "DepositToken" -vv
 
-# Tests de fuzz para depósitos
+# Fuzz tests for deposits
 forge test --match-test "testFuzz_Deposit" -vv
 ```
 
-### Tests de Retiros
+### Withdrawal Tests
 
 ```bash
-# Todos los tests de retiros
+# All withdrawal tests
 forge test --match-test "Withdraw" --gas-report
 
-# Con verbosidad
+# With verbosity
 forge test --match-test "Withdraw" -vv
 ```
 
-### Tests de Manager
+### Manager Tests
 
 ```bash
-# Funciones de manager
+# Manager functions
 forge test --match-test "AddToken|SetToken|SetBank|SetWithdrawal|SetSlippage" --gas-report
 ```
 
-### Tests de Admin
+### Admin Tests
 
 ```bash
-# Funciones de admin
+# Admin functions
 forge test --match-test "Pause|Emergency" --gas-report
 ```
 
-### Tests de View Functions
+### View Functions Tests
 
 ```bash
-# Funciones view
+# View functions
 forge test --match-test "GetBalance|GetTotal|GetSupported|GetToken|GetETH|GetExpected" -vv
 ```
 
 ---
 
-## 🔄 Workflow de Desarrollo
+## 🔄 Development Workflow
 
-### 1. Hacer Cambios al Código
+### 1. Make Code Changes
 
 ```bash
-# Editar src/KipuBankV3.sol
+# Edit src/KipuBankV3.sol
 vim src/KipuBankV3.sol
 ```
 
-### 2. Compilar y Verificar
+### 2. Compile and Verify
 
 ```bash
-# Compilar
+# Compile
 forge build
 
-# Verificar warnings
+# Verify warnings
 forge build --force 2>&1 | grep -i warning
 ```
 
-### 3. Ejecutar Tests
+### 3. Run Tests
 
 ```bash
-# Tests básicos
+# Basic tests
 forge test
 
-# Si fallan, ejecutar con verbosidad
+# If they fail, run with verbosity
 forge test -vvv
 ```
 
-### 4. Verificar Gas
+### 4. Verify Gas
 
 ```bash
-# Comparar gas antes/después
+# Compare gas before/after
 forge snapshot --diff
 ```
 
-### 5. Verificar Cobertura
+### 5. Verify Coverage
 
 ```bash
-# Asegurar >= 50% coverage
+# Ensure >= 50% coverage
 forge coverage
 ```
 
-### 6. Commit Cambios
+### 6. Commit Changes
 
 ```bash
 git add .
-git commit -m "feat: mejora X con ahorro de Y gas"
+git commit -m "feat: improve X with Y gas savings"
 ```
 
 ---
 
-## 📊 Benchmarks Esperados
+## 📊 Expected Benchmarks
 
-### Resultados Esperados de Tests
+### Expected Test Results
 
 ```
 Running 65 tests for test/KipuBankV3.t.sol:KipuBankV3Test
@@ -453,12 +453,12 @@ Deposit Token Tests (7):
 ✓ test_DepositToken_RevertsOnTokenNotSupported
 ✓ test_DepositToken_RevertsOnNativeToken
 
-... (resto de tests)
+... (rest of tests)
 
 Test result: ok. 65 passed; 0 failed; finished in 2.34s
 ```
 
-### Gas Esperado
+### Expected Gas
 
 ```
 Deployment Cost: 2,345,678 gas
@@ -474,7 +474,7 @@ Function Gas Costs:
 - pause(): ~10,200 gas
 ```
 
-### Cobertura Esperada
+### Expected Coverage
 
 ```
 src/KipuBankV3.sol:
@@ -491,7 +491,7 @@ src/KipuBankV3.sol:
 ### Error: "forge: command not found"
 
 ```bash
-# Reinstalar Foundry
+# Reinstall Foundry
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 ```
@@ -499,10 +499,10 @@ foundryup
 ### Error: "Failed to resolve imports"
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 forge install
 
-# O manualmente:
+# Or manually:
 forge install OpenZeppelin/openzeppelin-contracts --no-commit
 forge install smartcontractkit/chainlink --no-commit
 ```
@@ -510,26 +510,26 @@ forge install smartcontractkit/chainlink --no-commit
 ### Error: "Stack too deep"
 
 ```bash
-# Compilar con via-ir
+# Compile with via-ir
 forge build --via-ir
 
-# O ajustar optimizer runs
+# Or adjust optimizer runs
 forge build --optimizer-runs 1
 ```
 
-### Tests Fallan Aleatoriamente
+### Tests Fail Randomly
 
 ```bash
-# Ejecutar con seed fijo
+# Run with fixed seed
 forge test --fuzz-seed 42
 
-# Aumentar fuzz runs
+# Increase fuzz runs
 forge test --fuzz-runs 1000
 ```
 
 ---
 
-## 📚 Recursos Adicionales
+## 📚 Additional Resources
 
 - [Foundry Book](https://book.getfoundry.sh/)
 - [Forge Testing Cheatsheet](https://github.com/dabit3/foundry-cheatsheet)
@@ -538,18 +538,18 @@ forge test --fuzz-runs 1000
 
 ---
 
-## ✅ Checklist de Testing
+## ✅ Testing Checklist
 
-Antes de hacer deploy o PR:
+Before deployment or PR:
 
-- [ ] `forge build` compila sin errores
-- [ ] `forge test` - todos los tests pasan
-- [ ] `forge test --gas-report` - gas es razonable
-- [ ] `forge coverage` - cobertura >= 50%
-- [ ] `forge snapshot --diff` - cambios de gas son esperados
-- [ ] `slither .` - sin vulnerabilidades críticas
-- [ ] Tests de integración en fork pasan
-- [ ] Documentación actualizada
+- [ ] `forge build` compiles without errors
+- [ ] `forge test` - all tests pass
+- [ ] `forge test --gas-report` - gas is reasonable
+- [ ] `forge coverage` - coverage >= 50%
+- [ ] `forge snapshot --diff` - gas changes are expected
+- [ ] `slither .` - no critical vulnerabilities
+- [ ] Integration tests on fork pass
+- [ ] Documentation updated
 
 ---
 

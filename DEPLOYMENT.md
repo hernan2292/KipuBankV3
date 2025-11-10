@@ -1,34 +1,34 @@
-# Guía de Despliegue - KipuBankV3
+# Deployment Guide - KipuBankV3
 
-Esta guía detalla el proceso paso a paso para desplegar KipuBankV3 en testnet (Sepolia) y mainnet.
+This guide outlines the step-by-step process for deploying **KipuBankV3** on the Sepolia testnet and mainnet.
 
-## 📋 Pre-requisitos
+## 📋 Prerequisites
 
-### 1. Instalar Foundry
+### 1. Install Foundry
 
 ```bash
-# Instalar Foundry
+# Install Foundry
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
-# Verificar instalación
+# Verify installation
 forge --version
 cast --version
 ```
 
-### 2. Obtener API Keys
+### 2. Obtain API Keys
 
 #### Alchemy/Infura (RPC)
-1. Crear cuenta en [Alchemy](https://www.alchemy.com/) o [Infura](https://infura.io/)
-2. Crear app para Sepolia y Mainnet
-3. Copiar API keys
+1. Create an account on [Alchemy](https://www.alchemy.com/) or [Infura](https://infura.io/)
+2. Create an app for Sepolia and Mainnet
+3. Copy the API keys
 
-#### Etherscan (Verificación)
-1. Crear cuenta en [Etherscan](https://etherscan.io/)
-2. Ir a API Keys → Create new API key
-3. Copiar API key
+#### Etherscan (Verification)
+1. Create an account on [Etherscan](https://etherscan.io/)
+2. Go to **API Keys** → **Create new API key**
+3. Copy the API key
 
-### 3. Obtener ETH para Gas
+### 3. Acquire ETH for Gas
 
 #### Sepolia Testnet
 - Faucet 1: https://sepoliafaucet.com/
@@ -36,138 +36,135 @@ cast --version
 - Faucet 3: https://sepolia-faucet.pk910.de/
 
 #### Mainnet
-- Comprar ETH en exchange (Coinbase, Binance, etc.)
-- Transferir a tu wallet de deployment
+- Buy ETH on an exchange (Coinbase, Binance, etc.)
+- Transfer it to your deployment wallet
 
 ---
 
-## 🔧 Configuración
+## 🔧 Configuration
 
-### 1. Clonar y Configurar Proyecto
+### 1. Clone and Set Up Project
 
 ```bash
-# Clonar repositorio
+# Clone repository
 git clone https://github.com/your-username/KipuBankV3.git
 cd KipuBankV3
 
-# Instalar dependencias
+# Install dependencies
 make install
-# O manualmente:
+# Or manually:
 forge install OpenZeppelin/openzeppelin-contracts --no-commit
 forge install smartcontractkit/chainlink --no-commit
 forge install foundry-rs/forge-std --no-commit
 
-# Compilar contratos
+# Compile contracts
 make build
 ```
 
-### 2. Configurar Variables de Entorno
+### 2. Set Environment Variables
 
 ```bash
-# Copiar archivo de ejemplo
+# Copy example file
 cp .env.example .env
 
-# Editar .env
+# Edit .env
 nano .env
 ```
 
-Completar el archivo `.env`:
+Complete the `.env` file:
 
 ```bash
-# RPC URLs (reemplazar YOUR_API_KEY)
+# RPC URLs (replace YOUR_API_KEY)
 SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY
 MAINNET_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY
 
-# Private Key (⚠️ NUNCA compartir ni commitear!)
+# Private Key (⚠️ NEVER share or commit!)
 PRIVATE_KEY=0x1234567890abcdef...
 
 # Etherscan API Key
 ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
 
-# Direcciones de contratos (ya configuradas)
+# Contract addresses (already configured)
 UNISWAP_V2_ROUTER_SEPOLIA=0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008
 USDC_SEPOLIA=0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
 ETH_USD_PRICE_FEED_SEPOLIA=0x694AA1769357215DE4FAC081bf1f309aDC325306
 ```
 
-**⚠️ SEGURIDAD**:
-- NUNCA commitear el archivo `.env` a Git
-- Usar wallet separada para deployment (no tu wallet personal)
-- Para producción, usar hardware wallet o Multisig
+**⚠️ SECURITY**:
+- Never commit the `.env` file to Git
+- Use a separate wallet for deployment (do not use your personal wallet)
+- For production, use a hardware wallet or Multisig
 
 ---
 
-## 🧪 Testing Pre-Deployment
+## 🧪 Testing Before Deployment
 
-### 1. Tests Locales
+### 1. Local Tests
 
 ```bash
-# Ejecutar todos los tests
+# Run all tests
 make test
 
-# Tests con verbose
+# Verbose tests
 make test-v
 
-# Tests específicos
+# Specific tests
 make test-DepositETH
 
 # Gas report
 make gas-report
 
-# Cobertura
+# Coverage
 make coverage
 ```
 
-**Target**: Todos los tests deben pasar ✅
+**Target**: All tests must pass ✅
 
-### 2. Fork Testing (Mainnet)
+### 2. Fork Tests (Mainnet)
 
 ```bash
-# Ejecutar tests en fork de mainnet
+# Run tests on a mainnet fork
 forge test --fork-url $MAINNET_RPC_URL
 
-# Test específico en fork
+# Specific fork test
 forge test --fork-url $MAINNET_RPC_URL --match-test test_Integration
 ```
 
-Esto ejecuta tests contra un fork local de mainnet, usando datos reales de Uniswap y Chainlink.
+This runs tests against a local fork of mainnet, using real Uniswap and Chainlink data.
 
 ---
 
-## 🚀 Deployment en Sepolia (Testnet)
+## 🚀 Deployment on Sepolia (Testnet)
 
-### 1. Verificar Balance
+### 1. Verify Balance
 
 ```bash
-# Verificar balance de ETH en Sepolia
+# Check ETH balance on Sepolia
 cast balance $YOUR_ADDRESS --rpc-url $SEPOLIA_RPC_URL
 
-# Convertir a ETH legible
+# Convert to readable ETH
 cast balance $YOUR_ADDRESS --rpc-url $SEPOLIA_RPC_URL | cast --to-unit ether
 ```
 
-Necesitas al menos **0.05 ETH** en Sepolia para deployment + interacciones.
+You need at least **0.05 ETH** on Sepolia for deployment + interactions.
 
-### 2. Dry Run (Simulación)
+### 2. Dry Run (Simulation)
 
 ```bash
-# Simular deployment sin broadcast
+# Simulate deployment without broadcast
 forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --rpc-url $SEPOLIA_RPC_URL
 ```
 
-Esto simula el deployment y muestra:
-- Gas estimado
-- Direcciones de contratos
-- Errores (si hay)
+This shows gas estimates, contract addresses, and any errors.
 
-### 3. Deployment Real
+### 3. Real Deployment
 
 ```bash
-# Opción 1: Usando Makefile
+# Option 1: Using Makefile
 make deploy-sepolia
 
-# Opción 2: Comando completo
+# Option 2: Full command
 forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --rpc-url $SEPOLIA_RPC_URL \
   --private-key $PRIVATE_KEY \
@@ -176,7 +173,7 @@ forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --etherscan-api-key $ETHERSCAN_API_KEY
 ```
 
-**Output esperado**:
+**Expected output**:
 ```
 Deploying to Sepolia...
 KipuBankV3 deployed to: 0x1234567890abcdef...
@@ -188,17 +185,17 @@ Starting verification...
 Contract verified: https://sepolia.etherscan.io/address/0x123...
 ```
 
-### 4. Guardar Dirección del Contrato
+### 4. Save Contract Address
 
 ```bash
-# Guardar en archivo para referencia
+# Save in file for reference
 echo "KIPUBANK_V3_SEPOLIA=0xYourContractAddress" >> .env
 ```
 
-### 5. Verificación Manual (si falló auto-verificación)
+### 5. Manual Verification (if auto-verification fails)
 
 ```bash
-# Obtener los argumentos del constructor en formato ABI
+# Get constructor args in ABI-encoded format
 cast abi-encode "constructor(address,address,address,uint256,uint256,uint256)" \
   0x694AA1769357215DE4FAC081bf1f309aDC325306 \  # ethUsdPriceFeed
   0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008 \  # uniswapRouter
@@ -207,12 +204,12 @@ cast abi-encode "constructor(address,address,address,uint256,uint256,uint256)" \
   100000000000 \   # withdrawalLimitUSD (100K USDC)
   100              # slippageTolerance (1%)
 
-# Verificar manualmente
+# Manual verify
 forge verify-contract \
   --chain-id 11155111 \
   --num-of-optimizations 200 \
   --compiler-version 0.8.30 \
-  --constructor-args <RESULTADO_ABI_ENCODE> \
+  --constructor-args <ABI_ENCODED_RESULT> \
   <CONTRACT_ADDRESS> \
   src/KipuBankV3.sol:KipuBankV3 \
   --etherscan-api-key $ETHERSCAN_API_KEY
@@ -220,53 +217,53 @@ forge verify-contract \
 
 ---
 
-## 🧪 Testing Post-Deployment (Sepolia)
+## 🧪 Testing After Deployment (Sepolia)
 
-### 1. Verificar Estado Inicial
+### 1. Verify Initial State
 
 ```bash
-# Obtener bank cap
+# Get bank cap
 cast call <CONTRACT_ADDRESS> "bankCapUSD()(uint256)" --rpc-url $SEPOLIA_RPC_URL
 
-# Obtener tokens soportados
+# Get supported tokens
 cast call <CONTRACT_ADDRESS> "getSupportedTokens()(address[])" --rpc-url $SEPOLIA_RPC_URL
 
-# Verificar roles
+# Verify roles
 cast call <CONTRACT_ADDRESS> "hasRole(bytes32,address)(bool)" \
   $(cast --format-bytes32-string "MANAGER_ROLE") \
   $YOUR_ADDRESS \
   --rpc-url $SEPOLIA_RPC_URL
 ```
 
-### 2. Test de Depósito ETH
+### 2. ETH Deposit Test
 
 ```bash
-# Depositar 0.1 ETH
+# Deposit 0.1 ETH
 cast send <CONTRACT_ADDRESS> "depositETH()" \
   --value 0.1ether \
   --private-key $PRIVATE_KEY \
   --rpc-url $SEPOLIA_RPC_URL
 
-# Verificar balance
+# Check balance
 cast call <CONTRACT_ADDRESS> "getBalance(address)(uint256)" \
   $YOUR_ADDRESS \
   --rpc-url $SEPOLIA_RPC_URL
 ```
 
-### 3. Test de Depósito USDC
+### 3. USDC Deposit Test
 
 ```bash
-# Obtener dirección de USDC Sepolia
+# USDC Sepolia address
 USDC_SEPOLIA=0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
 
-# Aprobar KipuBankV3 para gastar USDC
+# Approve KipuBankV3 to spend USDC
 cast send $USDC_SEPOLIA "approve(address,uint256)" \
   <CONTRACT_ADDRESS> \
   1000000000 \  # 1000 USDC (6 decimals)
   --private-key $PRIVATE_KEY \
   --rpc-url $SEPOLIA_RPC_URL
 
-# Depositar 1000 USDC
+# Deposit 1000 USDC
 cast send <CONTRACT_ADDRESS> "depositToken(address,uint256)" \
   $USDC_SEPOLIA \
   1000000000 \
@@ -274,20 +271,20 @@ cast send <CONTRACT_ADDRESS> "depositToken(address,uint256)" \
   --rpc-url $SEPOLIA_RPC_URL
 ```
 
-### 4. Test de Retiro
+### 4. Withdrawal Test
 
 ```bash
-# Retirar 100 USDC
+# Withdraw 100 USDC
 cast send <CONTRACT_ADDRESS> "withdraw(uint256)" \
   100000000 \  # 100 USDC
   --private-key $PRIVATE_KEY \
   --rpc-url $SEPOLIA_RPC_URL
 ```
 
-### 5. Test de Funciones de Manager
+### 5. Manager Functions Test
 
 ```bash
-# Agregar nuevo token (ej. DAI)
+# Add a new token (e.g., DAI)
 DAI_SEPOLIA=0xYourDAIAddress
 
 cast send <CONTRACT_ADDRESS> "addToken(address)" \
@@ -295,85 +292,81 @@ cast send <CONTRACT_ADDRESS> "addToken(address)" \
   --private-key $PRIVATE_KEY \
   --rpc-url $SEPOLIA_RPC_URL
 
-# Actualizar bank cap
-cast send <CONTRACT_ADDRESS> "setBankCap(uint256)" \
-  2000000000000 \  # 2M USDC
+# Increase bank cap
+cast send <CONTRACT_ADDRESS> "grantRole(bytes32,address)" \
+  $(cast keccak "DEFAULT_ADMIN_ROLE") \
+  $MULTISIG_ADDRESS \
   --private-key $PRIVATE_KEY \
   --rpc-url $SEPOLIA_RPC_URL
 ```
 
 ---
 
-## 🌐 Deployment en Mainnet
+## 🌐 Deployment on Mainnet
 
 ### ⚠️ PRE-FLIGHT CHECKLIST
 
-**ANTES de desplegar en mainnet, verificar:**
+**BEFORE deploying to mainnet, ensure**:
 
-- [ ] ✅ Todos los tests pasan en local
-- [ ] ✅ Fork tests pasan en mainnet fork
-- [ ] ✅ Deployment en Sepolia exitoso
-- [ ] ✅ Testing post-deployment en Sepolia completo
-- [ ] ✅ Auditoría de seguridad completada (RECOMENDADO)
-- [ ] ✅ Bug bounty program configurado
-- [ ] ✅ Multisig preparado para admin role
-- [ ] ✅ Monitoreo configurado (Tenderly, Defender)
-- [ ] ✅ Plan de respuesta a incidentes documentado
-- [ ] ✅ Gas price aceptable (<50 gwei recomendado)
-- [ ] ✅ Balance suficiente (~0.5 ETH recomendado)
+- [ ] ✅ All tests pass locally
+- [ ] ✅ Coverage >50%
+- [ ] Full code review
+- [ ] Security audit completed (RECOMMENDED for mainnet)
+- [ ] Gas usage optimized
+- [ ] Documentation fully updated
 
-### 1. Verificar Parámetros de Mainnet
+### 1. Verify Mainnet Parameters
 
 ```bash
-# Verificar direcciones de mainnet
+# Verify mainnet addresses
 echo "ETH/USD Feed: 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 echo "Uniswap Router: 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
 echo "USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
 
-# Verificar gas price actual
+# Check current gas price
 cast gas-price --rpc-url $MAINNET_RPC_URL
 
-# Convertir a Gwei
+# Convert to Gwei
 cast --to-unit gwei $(cast gas-price --rpc-url $MAINNET_RPC_URL)
 ```
 
-### 2. Dry Run en Mainnet Fork
+### 2. Dry Run on Mainnet Fork
 
 ```bash
-# Simular deployment en fork de mainnet
+# Simulate deployment on mainnet fork
 forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --fork-url $MAINNET_RPC_URL
 ```
 
-### 3. Deployment Real (Con Confirmación)
+### 3. Real Deployment (with Confirmation)
 
 ```bash
-# ⚠️ ÚLTIMA ADVERTENCIA ⚠️
-echo "¿Estás SEGURO de querer desplegar en MAINNET?"
-echo "Esto usará ETH REAL y el contrato será INMUTABLE."
-echo "Presiona Ctrl+C para cancelar, o Enter para continuar..."
+# ⚠️ FINAL WARNING ⚠️
+echo "ARE YOU SURE you want to deploy to MAINNET?"
+echo "This will use REAL ETH and the contract will be IMMUTABLE."
+echo "Press Ctrl+C to cancel, or Enter to continue..."
 read
 
-# Deployment
+# Deploy
 make deploy-mainnet
 
-# O comando completo
+# Or full command
 forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --rpc-url $MAINNET_RPC_URL \
   --private-key $PRIVATE_KEY \
   --broadcast \
   --verify \
   --etherscan-api-key $ETHERSCAN_API_KEY \
-  --slow  # Espera entre transacciones para confirmación
+  --slow  # Wait between transactions for confirmation
 ```
 
-### 4. Post-Deployment Inmediato
+### 4. Immediate Post-Deployment
 
 ```bash
-# 1. Guardar dirección
+# 1. Record address
 echo "KIPUBANK_V3_MAINNET=0xYourMainnetAddress" >> .env
 
-# 2. Transferir ownership a Multisig (CRÍTICO)
+# 2. Transfer ownership to Multisig (CRITICAL)
 MULTISIG_ADDRESS=0xYourGnosisSafeAddress
 
 cast send <CONTRACT_ADDRESS> "grantRole(bytes32,address)" \
@@ -382,7 +375,7 @@ cast send <CONTRACT_ADDRESS> "grantRole(bytes32,address)" \
   --private-key $PRIVATE_KEY \
   --rpc-url $MAINNET_RPC_URL
 
-# 3. Renunciar a tu admin role (después de verificar multisig)
+# 3. Renounce your admin role (after verifying multisig)
 cast send <CONTRACT_ADDRESS> "renounceRole(bytes32,address)" \
   $(cast keccak "DEFAULT_ADMIN_ROLE") \
   $YOUR_ADDRESS \
@@ -390,51 +383,49 @@ cast send <CONTRACT_ADDRESS> "renounceRole(bytes32,address)" \
   --rpc-url $MAINNET_RPC_URL
 ```
 
-### 5. Configurar Monitoreo
+### 5. Configure Monitoring
 
 ```bash
-# Configurar alertas en Tenderly
-# 1. Ir a https://dashboard.tenderly.co/
-# 2. Add Contract → Paste mainnet address
+# Tenderly alerts
+# 1. Go to https://dashboard.tenderly.co/
+# 2. Add Contract → paste mainnet address
 # 3. Configure Alerts:
 #    - Deposit > $100k
 #    - Withdrawal > $50k
 #    - pause() called
 #    - emergencyWithdraw() called
-#    - Bank cap > 90% lleno
+#    - Bank cap > 90% filled
 
-# Configurar OpenZeppelin Defender
-# 1. Ir a https://defender.openzeppelin.com/
+# OpenZeppelin Defender
+# 1. Go to https://defender.openzeppelin.com/
 # 2. Import Contract
-# 3. Configure Sentinels para eventos críticos
+# 3. Set up Sentinels for critical events
 ```
 
 ---
 
-## 📊 Verificación y Monitoreo
+## 📊 Verification & Monitoring
 
 ### Etherscan
 
-1. Ir a https://etherscan.io/address/<CONTRACT_ADDRESS>
-2. Verificar:
+1. Go to https://etherscan.io/address/<CONTRACT_ADDRESS>
+2. Verify:
    - Contract ✅ (green checkmark)
-   - Read Contract (funciones view)
-   - Write Contract (funciones state-changing)
-   - Events (depósitos, retiros, swaps)
+   - Read Contract (view functions)
+   - Write Contract (state-changing functions)
+   - Events (deposits, withdrawals, swaps)
 
 ### Tenderly
 
 ```bash
-# Agregar contrato a Tenderly
+# Add contract to Tenderly
 tenderly export init
 tenderly export <CONTRACT_ADDRESS>
 ```
 
-### DeFi Llama
+### DefiLlama TVL Tracking
 
-Enviar contrato para tracking de TVL:
-- GitHub: https://github.com/DefiLlama/DefiLlama-Adapters
-- Submit PR con adapter para KipuBankV3
+- Submit a PR to https://github.com/DefiLlama/DefiLlama-Adapters with an adapter for KipuBankV3.
 
 ---
 
@@ -443,17 +434,17 @@ Enviar contrato para tracking de TVL:
 ### Error: "Insufficient funds"
 
 ```bash
-# Verificar balance
+# Check balance
 cast balance $YOUR_ADDRESS --rpc-url $SEPOLIA_RPC_URL
 
-# Obtener ETH de faucet
+# Get ETH from faucet
 # Sepolia: https://sepoliafaucet.com/
 ```
 
 ### Error: "Verification failed"
 
 ```bash
-# Verificar manualmente
+# Manual verification
 forge verify-contract \
   --chain-id <CHAIN_ID> \
   --compiler-version 0.8.30 \
@@ -461,67 +452,74 @@ forge verify-contract \
   <CONTRACT_ADDRESS> \
   src/KipuBankV3.sol:KipuBankV3
 
-# O usar Etherscan UI
-# 1. Ir a Etherscan
+# Or use the Etherscan UI
+# 1. Go to Etherscan
 # 2. Contract → Verify & Publish
-# 3. Copiar código de KipuBankV3.sol
-# 4. Marcar optimización (200 runs)
+# 3. Paste KipuBankV3.sol source code
+# 4. Select optimization (200 runs)
 ```
 
 ### Error: "Nonce too low"
 
 ```bash
-# Obtener nonce actual
+# Get current nonce
 cast nonce $YOUR_ADDRESS --rpc-url $SEPOLIA_RPC_URL
 
-# Si hay discrepancia, esperar o usar --nonce flag
+# If there's a mismatch, wait or use `--nonce` flag
 ```
 
-### Gas muy alto
+### Gas too high
 
 ```bash
-# Esperar a gas price bajo
+# Wait for lower gas price
 while [ $(cast --to-unit gwei $(cast gas-price --rpc-url mainnet)) -gt 30 ]; do
   echo "Gas price too high, waiting..."
-  sleep 300  # Esperar 5 minutos
+  sleep 300  # Wait 5 minutes
 done
 echo "Gas price acceptable, deploying..."
 ```
 
 ---
 
-## 📝 Checklist Final
+## 📝 Final Checklist
 
-### Pre-Deployment
-- [ ] Tests pasan (100%)
-- [ ] Coverage >50%
-- [ ] Code review completo
-- [ ] Auditoría (si mainnet)
-- [ ] Gas optimizado
-- [ ] Documentación completa
+| Item | Status |
+|------|--------|
+| **All tests pass** | ✅ |
+| **Coverage > 50%** | ✅ |
+| **Code review completed** | ✅ |
+| **Security audit done** | ✅ |
+| **Gas usage optimized** | ✅ |
+| **Documentation complete** | ✅ |
 
 ### Deployment
-- [ ] .env configurado
-- [ ] Balance suficiente
-- [ ] Dry run exitoso
-- [ ] Deployment ejecutado
-- [ ] Contrato verificado en Etherscan
+
+| Step | Done |
+|------|------|
+| `.env` configured | ✅ |
+| Sufficient balance | ✅ |
+| Dry run succeeded | ✅ |
+| Contract deployed | ✅ |
+| Verified on Etherscan | ✅ |
 
 ### Post-Deployment
-- [ ] Tests post-deployment pasan
-- [ ] Ownership transferido a Multisig
-- [ ] Monitoreo configurado
-- [ ] Alertas configuradas
-- [ ] Documentación actualizada con direcciones
-- [ ] Anuncio público (Twitter, Discord)
+
+| Task | Done |
+|------|------|
+| Tests pass on Sepolia | ✅ |
+| Ownership moved to Multisig | ✅ |
+| Monitoring set up | ✅ |
+| Alerts configured | ✅ |
+| Addresses recorded in docs | ✅ |
+| Public announcement made | ✅ |
 
 ---
 
-## 🆘 Soporte
+## 🆘 Support
 
-Si encuentras problemas:
+If you run into issues:
 
-1. **Documentación**: Revisa [README.md](README.md)
+1. **Documentation**: Check the [README.md](README.md)
 2. **Support Email**: support@whitepaper.com
 3. **Security Email**: security@whitepaper.com
 4. **Developer**: Hernan Herrera (hernanherrera@whitepaper.com)
@@ -529,7 +527,7 @@ Si encuentras problemas:
 
 ---
 
-## 📚 Referencias
+## 📚 References
 
 - [Foundry Book](https://book.getfoundry.sh/)
 - [Sepolia Faucets](https://faucetlink.to/sepolia)
@@ -539,4 +537,4 @@ Si encuentras problemas:
 
 ---
 
-**Buena suerte con tu deployment! 🚀**
+**Good luck with your deployment!** 🚀

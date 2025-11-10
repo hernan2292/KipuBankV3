@@ -1,17 +1,17 @@
 # Test Coverage Report - KipuBankV3
 
-**Fecha**: 2025-11-09
-**Versión**: 1.0.0
+**Date**: 2025-11-09
+**Version**: 1.0.0
 **Framework**: Foundry (Forge)
 **Solidity**: 0.8.30
-**Autor**: Hernan Herrera
-**Organización**: White Paper
+**Author**: Hernan Herrera
+**Organization**: White Paper
 
 ---
 
-## 📊 Resumen de Cobertura
+## 📊 Coverage Summary
 
-### Estadísticas Generales
+### General Statistics
 
 ```
 Total Tests:              49
@@ -19,15 +19,15 @@ Total Tests:              49
 ❌ Failed:                0 (0%)
 ⏭️ Skipped:               0 (0%)
 
-Cobertura de Líneas:      78.26%
-Cobertura de Statements:  80.43%
-Cobertura de Branches:    ~65%
-Cobertura de Funciones:   ~85%
+Line Coverage:            78.26%
+Statement Coverage:       80.43%
+Branch Coverage:          ~65%
+Function Coverage:        ~85%
 ```
 
-### Estado de Aprobación
+### Approval Status
 
-| Métrica | Objetivo | Actual | Estado |
+| Metric | Target | Actual | Status |
 |---------|----------|--------|--------|
 | Lines | >75% | 78.26% | ✅ PASS |
 | Statements | >75% | 80.43% | ✅ PASS |
@@ -36,299 +36,299 @@ Cobertura de Funciones:   ~85%
 
 ---
 
-## 🧪 Desglose de Tests por Categoría
+## 🧪 Test Breakdown by Category
 
 ### 1. Constructor Tests (6 tests)
 
-**Cobertura**: 100%
-**Estado**: ✅ Completo
+**Coverage**: 100%
+**Status**: ✅ Complete
 
-| Test | Descripción | Gas |
+| Test | Description | Gas |
 |------|-------------|-----|
-| `test_Constructor_Success()` | Verifica inicialización correcta | 24,478 |
-| `test_Constructor_GrantsRoles()` | Valida roles asignados | 24,304 |
-| `test_Constructor_AddsDefaultTokens()` | Verifica tokens por defecto | 16,352 |
-| `test_Constructor_RevertsOnZeroAddress()` | Rechaza direcciones zero | 281,571 |
-| `test_Constructor_RevertsOnInvalidBankCap()` | Valida bank cap inicial | 283,324 |
-| `test_Constructor_RevertsOnInvalidWithdrawalLimit()` | Valida límite de retiro | 283,297 |
+| `test_Constructor_Success()` | Verifies correct initialization | 24,478 |
+| `test_Constructor_GrantsRoles()` | Validates assigned roles | 24,304 |
+| `test_Constructor_AddsDefaultTokens()` | Verifies default tokens | 16,352 |
+| `test_Constructor_RevertsOnZeroAddress()` | Rejects zero addresses | 281,571 |
+| `test_Constructor_RevertsOnInvalidBankCap()` | Validates initial bank cap | 283,324 |
+| `test_Constructor_RevertsOnInvalidWithdrawalLimit()` | Validates withdrawal limit | 283,297 |
 
-**Casos Cubiertos**:
-- ✅ Inicialización de todas las variables de estado
-- ✅ Asignación correcta de roles (Admin, Manager)
-- ✅ Tokens por defecto (ETH, USDC) agregados
-- ✅ Validación de parámetros del constructor
-- ✅ Rechazo de direcciones zero
-- ✅ Validación de bank cap y límite de retiro
+**Covered Cases**:
+- ✅ Initialization of all state variables
+- ✅ Correct role assignment (Admin, Manager)
+- ✅ Default tokens (ETH, USDC) added
+- ✅ Constructor parameter validation
+- ✅ Zero address rejection
+- ✅ Bank cap and withdrawal limit validation
 
 ---
 
 ### 2. Deposit ETH Tests (6 tests)
 
-**Cobertura**: 95%
-**Estado**: ✅ Completo
+**Coverage**: 95%
+**Status**: ✅ Complete
 
-| Test | Descripción | Gas Promedio |
+| Test | Description | Avg Gas |
 |------|-------------|--------------|
-| `test_DepositETH_Success()` | Depósito exitoso de ETH | 156,560 |
-| `test_DepositETH_MultipleDeposits()` | Múltiples depósitos | 142,110 |
-| `test_DepositETH_RevertsOnZeroAmount()` | Rechaza cantidad zero | 42,288 |
-| `test_DepositETH_RevertsWhenPaused()` | Rechaza cuando pausado | 97,875 |
-| `test_DepositETH_RevertsOnBankCapExceeded()` | Valida bank cap | 210,131 |
-| `testFuzz_DepositETH(uint256)` | Fuzz con 257 runs | 180,438 |
+| `test_DepositETH_Success()` | Successful ETH deposit | 156,560 |
+| `test_DepositETH_MultipleDeposits()` | Multiple deposits | 142,110 |
+| `test_DepositETH_RevertsOnZeroAmount()` | Rejects zero amount | 42,288 |
+| `test_DepositETH_RevertsWhenPaused()` | Rejects when paused | 97,875 |
+| `test_DepositETH_RevertsOnBankCapExceeded()` | Validates bank cap | 210,131 |
+| `testFuzz_DepositETH(uint256)` | Fuzz with 257 runs | 180,438 |
 
-**Casos Cubiertos**:
-- ✅ Depósito exitoso con swap ETH → USDC
-- ✅ Emisión correcta de eventos (TokenSwapped, Deposit)
-- ✅ Actualización de balances y totalBankValueUSD
-- ✅ Validación de bank cap
-- ✅ Protección contra pause
-- ✅ Validación de cantidad zero
-- ✅ Fuzz testing con 256+ cantidades aleatorias
+**Covered Cases**:
+- ✅ Successful deposit with ETH → USDC swap
+- ✅ Correct event emission (TokenSwapped, Deposit)
+- ✅ Balance and totalBankValueUSD updates
+- ✅ Bank cap validation
+- ✅ Pause protection
+- ✅ Zero amount validation
+- ✅ Fuzz testing with 256+ random amounts
 
-**Casos No Cubiertos**:
-- ❌ Swap que falla por falta de liquidez
-- ❌ Slippage exacto al límite (99% del esperado)
+**Uncovered Cases**:
+- ❌ Swap failure due to lack of liquidity
+- ❌ Exact slippage at limit (99% of expected)
 
 ---
 
 ### 3. Deposit Token Tests (7 tests)
 
-**Cobertura**: 90%
-**Estado**: ✅ Completo
+**Coverage**: 90%
+**Status**: ✅ Complete
 
-| Test | Descripción | Gas Promedio |
+| Test | Description | Avg Gas |
 |------|-------------|--------------|
-| `test_DepositToken_USDC_Success()` | Depósito directo USDC | 130,807 |
-| `test_DepositToken_DAI_WithSwap()` | Depósito DAI con swap | 177,826 |
-| `test_DepositToken_RevertsOnZeroAmount()` | Rechaza cantidad zero | 44,377 |
-| `test_DepositToken_RevertsOnTokenNotSupported()` | Token no soportado | 620,891 |
-| `test_DepositToken_RevertsOnNativeToken()` | Rechaza address(0) | 40,764 |
-| `testFuzz_DepositUSDC(uint256)` | Fuzz USDC con 256 runs | 233,381 |
-| `test_Integration_TokenSwapFlow()` | Flujo completo end-to-end | 354,473 |
+| `test_DepositToken_USDC_Success()` | Direct USDC deposit | 130,807 |
+| `test_DepositToken_DAI_WithSwap()` | DAI deposit with swap | 177,826 |
+| `test_DepositToken_RevertsOnZeroAmount()` | Rejects zero amount | 44,377 |
+| `test_DepositToken_RevertsOnTokenNotSupported()` | Unsupported token | 620,891 |
+| `test_DepositToken_RevertsOnNativeToken()` | Rejects address(0) | 40,764 |
+| `testFuzz_DepositUSDC(uint256)` | Fuzz USDC with 256 runs | 233,381 |
+| `test_Integration_TokenSwapFlow()` | Complete end-to-end flow | 354,473 |
 
-**Casos Cubiertos**:
-- ✅ Depósito directo de USDC (sin swap)
-- ✅ Depósito de token ERC20 con swap (DAI → USDC)
-- ✅ Validación de token soportado
-- ✅ Validación de token activo (no pausado)
-- ✅ Rechazo de token nativo (address(0))
-- ✅ Slippage protection en swaps
-- ✅ Emisión correcta de eventos
+**Covered Cases**:
+- ✅ Direct USDC deposit (no swap)
+- ✅ ERC20 token deposit with swap (DAI → USDC)
+- ✅ Supported token validation
+- ✅ Active token validation (not paused)
+- ✅ Native token rejection (address(0))
+- ✅ Slippage protection in swaps
+- ✅ Correct event emission
 
-**Casos No Cubiertos**:
-- ❌ Token con decimales != 6 y != 18
-- ❌ Token con transfer fees (STA, PAXG)
-- ❌ Token ERC777 con hooks
+**Uncovered Cases**:
+- ❌ Token with decimals != 6 and != 18
+- ❌ Token with transfer fees (STA, PAXG)
+- ❌ ERC777 token with hooks
 
 ---
 
 ### 4. Withdrawal Tests (5 tests)
 
-**Cobertura**: 85%
-**Estado**: ✅ Completo
+**Coverage**: 85%
+**Status**: ✅ Complete
 
-| Test | Descripción | Gas Promedio |
+| Test | Description | Avg Gas |
 |------|-------------|--------------|
-| `test_Withdraw_Success()` | Retiro exitoso | 61,055 |
-| `test_Withdraw_RevertsOnZeroAmount()` | Rechaza cantidad zero | 40,430 |
-| `test_Withdraw_RevertsOnInsufficientBalance()` | Balance insuficiente | 47,586 |
-| `test_Withdraw_RevertsOnWithdrawalLimitExceeded()` | Excede límite | 228,718 |
-| `testFuzz_WithdrawUSDC(uint256,uint256)` | Fuzz con 256 runs | 292,740 |
+| `test_Withdraw_Success()` | Successful withdrawal | 61,055 |
+| `test_Withdraw_RevertsOnZeroAmount()` | Rejects zero amount | 40,430 |
+| `test_Withdraw_RevertsOnInsufficientBalance()` | Insufficient balance | 47,586 |
+| `test_Withdraw_RevertsOnWithdrawalLimitExceeded()` | Exceeds limit | 228,718 |
+| `testFuzz_WithdrawUSDC(uint256,uint256)` | Fuzz with 256 runs | 292,740 |
 
-**Casos Cubiertos**:
-- ✅ Retiro exitoso de USDC
-- ✅ Emisión de evento Withdrawal
-- ✅ Actualización correcta de balances
-- ✅ Validación de límite de retiro
-- ✅ Validación de balance suficiente
+**Covered Cases**:
+- ✅ Successful USDC withdrawal
+- ✅ Withdrawal event emission
+- ✅ Correct balance updates
+- ✅ Withdrawal limit validation
+- ✅ Sufficient balance validation
 - ✅ CEI pattern (Checks-Effects-Interactions)
-- ✅ Fuzz testing con múltiples combinaciones
+- ✅ Fuzz testing with multiple combinations
 
-**Casos No Cubiertos**:
-- ❌ Retiro cuando contrato está pausado
-- ❌ Retiro que falla por USDC blacklist
+**Uncovered Cases**:
+- ❌ Withdrawal when contract is paused
+- ❌ Withdrawal failure due to USDC blacklist
 
 ---
 
 ### 5. Manager Functions Tests (8 tests)
 
-**Cobertura**: 80%
-**Estado**: ⚠️ Mejorar
+**Coverage**: 80%
+**Status**: ⚠️ Improve
 
-| Test | Descripción | Gas |
+| Test | Description | Gas |
 |------|-------------|-----|
-| `test_AddToken_Success()` | Agregar token exitosamente | 107,966 |
-| `test_AddToken_RevertsOnZeroAddress()` | Rechaza address(0) | 36,238 |
-| `test_AddToken_RevertsOnTokenAlreadySupported()` | Token duplicado | 127,545 |
-| `test_AddToken_RevertsOnUnauthorized()` | Sin permisos | 39,483 |
-| `test_SetBankCap_Success()` | Cambiar bank cap | 48,884 |
-| `test_SetBankCap_RevertsOnZero()` | Rechaza cap = 0 | 40,743 |
-| `test_SetWithdrawalLimit_Success()` | Cambiar límite retiro | 46,416 |
-| `test_SetSlippageTolerance_Success()` | Cambiar slippage | 44,224 |
+| `test_AddToken_Success()` | Add token successfully | 107,966 |
+| `test_AddToken_RevertsOnZeroAddress()` | Rejects address(0) | 36,238 |
+| `test_AddToken_RevertsOnTokenAlreadySupported()` | Duplicate token | 127,545 |
+| `test_AddToken_RevertsOnUnauthorized()` | No permissions | 39,483 |
+| `test_SetBankCap_Success()` | Change bank cap | 48,884 |
+| `test_SetBankCap_RevertsOnZero()` | Rejects cap = 0 | 40,743 |
+| `test_SetWithdrawalLimit_Success()` | Change withdrawal limit | 46,416 |
+| `test_SetSlippageTolerance_Success()` | Change slippage | 44,224 |
 
-**Casos Cubiertos**:
-- ✅ Agregar nuevos tokens
-- ✅ Validación de duplicados
-- ✅ Cambiar bank cap
-- ✅ Cambiar límite de retiro
-- ✅ Cambiar slippage tolerance
-- ✅ Control de acceso (solo Manager)
+**Covered Cases**:
+- ✅ Add new tokens
+- ✅ Duplicate validation
+- ✅ Change bank cap
+- ✅ Change withdrawal limit
+- ✅ Change slippage tolerance
+- ✅ Access control (Manager only)
 
-**Casos No Cubiertos**:
-- ❌ setTokenStatus() con diferentes estados
-- ❌ Cambiar bank cap a valor menor que total depositado
-- ❌ Cambiar límite de retiro a valor mayor que bank cap
+**Uncovered Cases**:
+- ❌ setTokenStatus() with different states
+- ❌ Change bank cap to value less than total deposited
+- ❌ Change withdrawal limit to value greater than bank cap
 
 ---
 
 ### 6. Admin Functions Tests (5 tests)
 
-**Cobertura**: 90%
-**Estado**: ✅ Completo
+**Coverage**: 90%
+**Status**: ✅ Complete
 
-| Test | Descripción | Gas |
+| Test | Description | Gas |
 |------|-------------|-----|
-| `test_Pause_Success()` | Pausar contrato | 61,590 |
-| `test_Pause_RevertsOnUnauthorized()` | Sin permisos para pausar | 35,317 |
-| `test_Unpause_Success()` | Despausar contrato | 82,733 |
-| `test_EmergencyWithdraw_ETH()` | Retiro emergencia ETH | 44,629 |
-| `test_EmergencyWithdraw_Token()` | Retiro emergencia Token | 136,726 |
+| `test_Pause_Success()` | Pause contract | 61,590 |
+| `test_Pause_RevertsOnUnauthorized()` | No permissions to pause | 35,317 |
+| `test_Unpause_Success()` | Unpause contract | 82,733 |
+| `test_EmergencyWithdraw_ETH()` | Emergency withdraw ETH | 44,629 |
+| `test_EmergencyWithdraw_Token()` | Emergency withdraw Token | 136,726 |
 
-**Casos Cubiertos**:
-- ✅ Pausar/Despausar contrato
-- ✅ Control de acceso (solo Admin)
-- ✅ Emergency withdraw de ETH
-- ✅ Emergency withdraw de tokens
-- ✅ Validación de permisos
+**Covered Cases**:
+- ✅ Pause/Unpause contract
+- ✅ Access control (Admin only)
+- ✅ Emergency withdraw of ETH
+- ✅ Emergency withdraw of tokens
+- ✅ Permission validation
 
-**Casos No Cubiertos**:
-- ❌ Emergency withdraw con balance = 0
-- ❌ Múltiples pausas consecutivas
+**Uncovered Cases**:
+- ❌ Emergency withdraw with balance = 0
+- ❌ Multiple consecutive pauses
 
 ---
 
 ### 7. View Functions Tests (7 tests)
 
-**Cobertura**: 100%
-**Estado**: ✅ Completo
+**Coverage**: 100%
+**Status**: ✅ Complete
 
-| Test | Descripción | Gas |
+| Test | Description | Gas |
 |------|-------------|-----|
-| `test_GetBalance()` | Obtener balance usuario | 194,250 |
-| `test_GetTotalBankValueUSD()` | Valor total del banco | 321,428 |
-| `test_GetSupportedTokens()` | Lista tokens soportados | 14,875 |
-| `test_GetTokenInfo()` | Info de token específico | 13,542 |
-| `test_GetETHPriceUSD()` | Precio ETH/USD de oracle | 16,774 |
-| `test_GetExpectedUSDC_ForETH()` | USDC esperado por ETH | 15,703 |
-| `test_GetExpectedUSDC_ForUSDC()` | USDC esperado (1:1) | 8,761 |
+| `test_GetBalance()` | Get user balance | 194,250 |
+| `test_GetTotalBankValueUSD()` | Total bank value | 321,428 |
+| `test_GetSupportedTokens()` | List supported tokens | 14,875 |
+| `test_GetTokenInfo()` | Specific token info | 13,542 |
+| `test_GetETHPriceUSD()` | ETH/USD price from oracle | 16,774 |
+| `test_GetExpectedUSDC_ForETH()` | Expected USDC for ETH | 15,703 |
+| `test_GetExpectedUSDC_ForUSDC()` | Expected USDC (1:1) | 8,761 |
 
-**Casos Cubiertos**:
-- ✅ Todas las funciones view funcionan correctamente
-- ✅ getBalance() retorna balance correcto
-- ✅ getTotalBankValueUSD() suma correcta
-- ✅ getSupportedTokens() lista completa
-- ✅ getTokenInfo() datos correctos
-- ✅ getETHPriceUSD() precio válido
-- ✅ getExpectedUSDC() cálculo correcto
+**Covered Cases**:
+- ✅ All view functions work correctly
+- ✅ getBalance() returns correct balance
+- ✅ getTotalBankValueUSD() correct sum
+- ✅ getSupportedTokens() complete list
+- ✅ getTokenInfo() correct data
+- ✅ getETHPriceUSD() valid price
+- ✅ getExpectedUSDC() correct calculation
 
 ---
 
 ### 8. Security & Edge Cases Tests (5 tests)
 
-**Cobertura**: 85%
-**Estado**: ✅ Completo
+**Coverage**: 85%
+**Status**: ✅ Complete
 
-| Test | Descripción | Gas |
+| Test | Description | Gas |
 |------|-------------|-----|
-| `test_Receive_Reverts()` | Rechaza ETH directo | 38,984 |
-| `test_Fallback_Reverts()` | Rechaza calls desconocidos | 41,380 |
-| `test_Integration_MultipleUsersDepositsAndWithdrawals()` | 3 usuarios | 415,925 |
+| `test_Receive_Reverts()` | Rejects direct ETH | 38,984 |
+| `test_Fallback_Reverts()` | Rejects unknown calls | 41,380 |
+| `test_Integration_MultipleUsersDepositsAndWithdrawals()` | 3 users | 415,925 |
 
-**Casos Cubiertos**:
-- ✅ ReentrancyGuard previene ataques
-- ✅ receive() y fallback() rechazan calls
-- ✅ Multiple usuarios simultáneos
-- ✅ Múltiples operaciones concurrentes
-
----
-
-## 🎯 Funciones por Cobertura
-
-### ✅ 100% Cobertura
-
-1. `constructor()` - Inicialización
-2. `getBalance()` - Balance usuario
-3. `getTotalBankValueUSD()` - Valor total
-4. `getSupportedTokens()` - Lista tokens
-5. `getTokenInfo()` - Info token
-6. `getETHPriceUSD()` - Precio ETH
-7. `getExpectedUSDC()` - USDC esperado
-8. `pause()` / `unpause()` - Pausar
-9. `emergencyWithdraw()` - Emergencia
-
-### ⚠️ 80-99% Cobertura
-
-1. `depositETH()` - 95% (falta: swap failed edge case)
-2. `depositToken()` - 90% (falta: tokens raros)
-3. `withdraw()` - 85% (falta: pause check)
-4. `addToken()` - 95% (falta: decimals validation)
-5. `setBankCap()` - 85% (falta: edge cases)
-6. `setWithdrawalLimit()` - 80% (falta: validation)
-7. `setSlippageTolerance()` - 90% (falta: max value)
-8. `setTokenStatus()` - 75% (falta: tests)
-
-### ❌ <80% Cobertura
-
-1. `_getETHPrice()` - 70% (falta: staleness, invalid price)
+**Covered Cases**:
+- ✅ ReentrancyGuard prevents attacks
+- ✅ receive() and fallback() reject calls
+- ✅ Multiple simultaneous users
+- ✅ Multiple concurrent operations
 
 ---
 
-## 📈 Mejoras Recomendadas
+## 🎯 Functions by Coverage
 
-### Corto Plazo (1-2 semanas)
+### ✅ 100% Coverage
 
-1. **Aumentar cobertura a >90%**
+1. `constructor()` - Initialization
+2. `getBalance()` - User balance
+3. `getTotalBankValueUSD()` - Total value
+4. `getSupportedTokens()` - Token list
+5. `getTokenInfo()` - Token info
+6. `getETHPriceUSD()` - ETH price
+7. `getExpectedUSDC()` - Expected USDC
+8. `pause()` / `unpause()` - Pause
+9. `emergencyWithdraw()` - Emergency
+
+### ⚠️ 80-99% Coverage
+
+1. `depositETH()` - 95% (missing: swap failed edge case)
+2. `depositToken()` - 90% (missing: rare tokens)
+3. `withdraw()` - 85% (missing: pause check)
+4. `addToken()` - 95% (missing: decimals validation)
+5. `setBankCap()` - 85% (missing: edge cases)
+6. `setWithdrawalLimit()` - 80% (missing: validation)
+7. `setSlippageTolerance()` - 90% (missing: max value)
+8. `setTokenStatus()` - 75% (missing: tests)
+
+### ❌ <80% Coverage
+
+1. `_getETHPrice()` - 70% (missing: staleness, invalid price)
+
+---
+
+## 📈 Recommended Improvements
+
+### Short Term (1-2 weeks)
+
+1. **Increase coverage to >90%**
    - [ ] Test oracle price = 0
    - [ ] Test oracle staleness > MAX_PRICE_STALENESS
-   - [ ] Test swap que falla
-   - [ ] Test slippage exacto al límite
+   - [ ] Test swap failure
+   - [ ] Test exact slippage at limit
 
-2. **Agregar tests de integración**
-   - [ ] Fork test con Sepolia
-   - [ ] Fork test con Mainnet
-   - [ ] Test con contratos reales (no mocks)
+2. **Add integration tests**
+   - [ ] Fork test with Sepolia
+   - [ ] Fork test with Mainnet
+   - [ ] Test with real contracts (not mocks)
 
-3. **Mejorar fuzz testing**
-   - [ ] Aumentar runs a 1000+
-   - [ ] Agregar invariant testing
+3. **Improve fuzz testing**
+   - [ ] Increase runs to 1000+
+   - [ ] Add invariant testing
 
-### Medio Plazo (1-2 meses)
+### Medium Term (1-2 months)
 
-4. **Agregar tests de seguridad**
-   - [ ] Test reentrancy con ERC777
+4. **Add security tests**
+   - [ ] Test reentrancy with ERC777
    - [ ] Test front-running scenarios
    - [ ] Test flash loan attacks
 
-5. **Coverage detallado**
-   - [ ] Generar reporte HTML con lcov
-   - [ ] CI/CD con coverage automático
-   - [ ] Badge de coverage en README
+5. **Detailed coverage**
+   - [ ] Generate HTML report with lcov
+   - [ ] CI/CD with automatic coverage
+   - [ ] Coverage badge in README
 
 ---
 
-## 🔧 Comandos de Testing
+## 🔧 Testing Commands
 
-### Ejecutar Todos los Tests
+### Run All Tests
 ```bash
 forge test
 ```
 
-### Tests con Verbosidad
+### Tests with Verbosity
 ```bash
 forge test -vvv
 ```
 
-### Tests con Gas Report
+### Tests with Gas Report
 ```bash
 forge test --gas-report
 ```
@@ -338,22 +338,22 @@ forge test --gas-report
 forge coverage
 ```
 
-### Coverage con LCOV
+### Coverage with LCOV
 ```bash
 forge coverage --report lcov
 genhtml lcov.info --output-directory coverage
 open coverage/index.html
 ```
 
-### Tests Específicos
+### Specific Tests
 ```bash
-# Solo depósitos
+# Deposits only
 forge test --match-test "Deposit"
 
-# Solo retiros
+# Withdrawals only
 forge test --match-test "Withdraw"
 
-# Solo fuzz tests
+# Fuzz tests only
 forge test --match-test "testFuzz"
 ```
 
@@ -366,27 +366,27 @@ forge test --fork-url $SEPOLIA_RPC_URL -vv
 
 ## 📊 Gas Benchmarks
 
-### Operaciones de Usuario
+### User Operations
 
-| Función | Min Gas | Avg Gas | Max Gas | # Calls |
+| Function | Min Gas | Avg Gas | Max Gas | # Calls |
 |---------|---------|---------|---------|---------|
 | depositETH() | 29,325 | 155,332 | 156,560 | 263 |
 | depositToken() [USDC] | 29,225 | 135,006 | 135,619 | 264 |
 | depositToken() [swap] | - | 177,826 | 177,826 | 2 |
 | withdraw() | 28,799 | 60,744 | 64,745 | 262 |
 
-### Operaciones de Manager
+### Manager Operations
 
-| Función | Min Gas | Avg Gas | Max Gas | # Calls |
+| Function | Min Gas | Avg Gas | Max Gas | # Calls |
 |---------|---------|---------|---------|---------|
 | addToken() | 24,365 | 62,542 | 84,917 | 8 |
 | setBankCap() | 28,034 | 30,876 | 32,309 | 3 |
 | setWithdrawalLimit() | - | 32,505 | 32,505 | 1 |
 | setSlippageTolerance() | 23,654 | 26,797 | 29,941 | 2 |
 
-### Operaciones de Admin
+### Admin Operations
 
-| Función | Min Gas | Avg Gas | Max Gas | # Calls |
+| Function | Min Gas | Avg Gas | Max Gas | # Calls |
 |---------|---------|---------|---------|---------|
 | pause() | 23,942 | 41,396 | 47,214 | 4 |
 | unpause() | - | 25,033 | 25,033 | 1 |
@@ -395,26 +395,26 @@ forge test --fork-url $SEPOLIA_RPC_URL -vv
 
 ---
 
-## ✅ Conclusión
+## ✅ Conclusion
 
-**Estado General**: ✅ **APROBADO para Testnet**
+**Overall Status**: ✅ **APPROVED for Testnet**
 
-### Resumen
-- ✅ 49/49 tests pasando (100%)
-- ✅ Cobertura >75% en todas las métricas
-- ✅ Gas optimizado y documentado
-- ✅ Security best practices implementadas
-- ⚠️ Pendiente: Aumentar cobertura a >90% antes de Mainnet
+### Summary
+- ✅ 49/49 tests passing (100%)
+- ✅ Coverage >75% in all metrics
+- ✅ Gas optimized and documented
+- ✅ Security best practices implemented
+- ⚠️ Pending: Increase coverage to >90% before Mainnet
 
-### Recomendación
-El contrato está **listo para deployment en Sepolia** para testing público. Se recomienda:
-1. Aumentar cobertura a >90% antes de mainnet
-2. Realizar fork tests con contratos reales
-3. Audit profesional antes de mainnet
-4. Bug bounty program en testnet
+### Recommendation
+The contract is **ready for deployment on Sepolia** for public testing. Recommended:
+1. Increase coverage to >90% before mainnet
+2. Perform fork tests with real contracts
+3. Professional audit before mainnet
+4. Bug bounty program on testnet
 
 ---
 
-**Última Actualización**: 2025-11-09
-**Próxima Revisión**: Post-Testnet Beta (2-4 semanas)
-**Versión**: 1.0.0
+**Last Update**: 2025-11-09
+**Next Review**: Post-Testnet Beta (2-4 weeks)
+**Version**: 1.0.0

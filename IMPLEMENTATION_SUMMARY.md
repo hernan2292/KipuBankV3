@@ -1,153 +1,153 @@
-# KipuBankV3 - Resumen de Implementación
+# KipuBankV3 - Implementation Summary
 
-## 📋 Resumen Ejecutivo
+## 📋 Executive Summary
 
-**KipuBankV3** es una aplicación DeFi completa que cumple y excede todos los requisitos del examen. El proyecto implementa un sistema bancario avanzado con integración de Uniswap V2, permitiendo a los usuarios depositar cualquier token soportado y recibir crédito en USDC.
+**KipuBankV3** is a complete DeFi application that meets and exceeds all exam requirements. The project implements an advanced banking system with Uniswap V2 integration, allowing users to deposit any supported token and receive credit in USDC.
 
 ---
 
-## ✅ Cumplimiento de Objetivos
+## ✅ Objectives Compliance
 
-### 1. Manejar cualquier token intercambiable en Uniswap V2 ✅
+### 1. Handle any tradeable token on Uniswap V2 ✅
 
-**Implementación:**
-- ✅ Soporte para ETH nativo (swap via WETH)
-- ✅ Soporte para USDC (almacenamiento directo)
-- ✅ Soporte para cualquier ERC20 con par directo USDC en Uniswap V2
-- ✅ Función `addToken()` para agregar nuevos tokens dinámicamente
+**Implementation:**
+- ✅ Support for native ETH (swap via WETH)
+- ✅ Support for USDC (direct storage)
+- ✅ Support for any ERC20 with direct USDC pair on Uniswap V2
+- ✅ `addToken()` function to dynamically add new tokens
 
-**Ubicación en código:**
+**Code Location:**
 - [src/KipuBankV3.sol:238-285](src/KipuBankV3.sol) - `depositETH()`
 - [src/KipuBankV3.sol:309-393](src/KipuBankV3.sol) - `depositToken()`
 - [src/KipuBankV3.sol:490-520](src/KipuBankV3.sol) - `addToken()`
 
 **Tests:**
-- `test_DepositETH_Success()` - Línea 180
-- `test_DepositToken_DAI_WithSwap()` - Línea 239
-- `test_AddToken_Success()` - Línea 346
+- `test_DepositETH_Success()` - Line 180
+- `test_DepositToken_DAI_WithSwap()` - Line 239
+- `test_AddToken_Success()` - Line 346
 
 ---
 
-### 2. Ejecutar swaps de tokens dentro del smart contract ✅
+### 2. Execute token swaps within the smart contract ✅
 
-**Implementación:**
-- ✅ Integración directa con `IUniswapV2Router02`
-- ✅ Swap automático de cualquier token → USDC
-- ✅ Protección de slippage configurable
-- ✅ Validación de amountOut mínimo
-- ✅ Deadline de 5 minutos en todas las transacciones
+**Implementation:**
+- ✅ Direct integration with `IUniswapV2Router02`
+- ✅ Automatic swap of any token → USDC
+- ✅ Configurable slippage protection
+- ✅ Minimum amountOut validation
+- ✅ 5-minute deadline on all transactions
 
-**Proceso de Swap:**
+**Swap Process:**
 ```
 Token Input → Approve Router → swapExactTokensForTokens → USDC Output → Credit User
 ```
 
-**Ubicación en código:**
+**Code Location:**
 - [src/KipuBankV3.sol:258-274](src/KipuBankV3.sol) - Swap ETH → USDC
 - [src/KipuBankV3.sol:360-379](src/KipuBankV3.sol) - Swap Token → USDC
-- [src/interfaces/IUniswapV2Router02.sol](src/interfaces/IUniswapV2Router02.sol) - Interface Uniswap
+- [src/interfaces/IUniswapV2Router02.sol](src/interfaces/IUniswapV2Router02.sol) - Uniswap Interface
 
-**Características Destacadas:**
+**Featured Characteristics:**
 - Slippage tolerance: `(expectedUSDC * (10000 - slippageBps)) / 10000`
-- Aprobación just-in-time: `forceApprove()` antes del swap
-- Validación post-swap: Verificación de amountOut >= minUSDC
+- Just-in-time approval: `forceApprove()` before swap
+- Post-swap validation: Verification of amountOut >= minUSDC
 
 **Tests:**
-- `test_DepositToken_DAI_WithSwap()` - Línea 239
-- `test_Integration_TokenSwapFlow()` - Línea 475
+- `test_DepositToken_DAI_WithSwap()` - Line 239
+- `test_Integration_TokenSwapFlow()` - Line 475
 
 ---
 
-### 3. Preservar la funcionalidad de KipuBankV2 ✅
+### 3. Preserve KipuBankV2 functionality ✅
 
-**Funcionalidades Heredadas:**
+**Inherited Functionalities:**
 
-#### a) Depósitos
-- ✅ `depositETH()` - Depósito de ETH nativo
-- ✅ `depositToken()` - Depósito de ERC20
-- ✅ Balance tracking en USD (6 decimals)
+#### a) Deposits
+- ✅ `depositETH()` - Native ETH deposit
+- ✅ `depositToken()` - ERC20 deposit
+- ✅ Balance tracking in USD (6 decimals)
 - ✅ Event emission (Deposit, TokenSwapped)
 
-#### b) Retiros
-- ✅ `withdraw()` - Retiro de USDC
-- ✅ Validación de balance suficiente
-- ✅ Límite de retiro por transacción
+#### b) Withdrawals
+- ✅ `withdraw()` - USDC withdrawal
+- ✅ Sufficient balance validation
+- ✅ Per-transaction withdrawal limit
 - ✅ Event emission (Withdrawal)
 
-#### c) Ownership y Control
+#### c) Ownership and Control
 - ✅ AccessControl (Admin + Manager roles)
-- ✅ `pause()` / `unpause()` - Control de emergencias
-- ✅ `emergencyWithdraw()` - Recuperación de fondos
-- ✅ `addToken()` - Gestión de tokens soportados
-- ✅ `setTokenStatus()` - Pausar tokens individualmente
+- ✅ `pause()` / `unpause()` - Emergency control
+- ✅ `emergencyWithdraw()` - Fund recovery
+- ✅ `addToken()` - Supported token management
+- ✅ `setTokenStatus()` - Pause individual tokens
 
-#### d) Gestión de Configuración
-- ✅ `setBankCap()` - Actualizar capacidad del banco
-- ✅ `setWithdrawalLimit()` - Actualizar límite de retiros
-- ✅ `setSlippageTolerance()` - Ajustar protección de slippage
+#### d) Configuration Management
+- ✅ `setBankCap()` - Update bank capacity
+- ✅ `setWithdrawalLimit()` - Update withdrawal limit
+- ✅ `setSlippageTolerance()` - Adjust slippage protection
 
-**Mejoras sobre V2:**
-- ✅ Balance unificado en USDC (simplifica UX)
-- ✅ Swap automático (no requiere intervención del usuario)
-- ✅ Protección de slippage (no existía en V2)
-- ✅ Mayor cobertura de tests (65+ tests vs ~77 en V2)
+**Improvements over V2:**
+- ✅ Unified balance in USDC (simplifies UX)
+- ✅ Automatic swap (no user intervention required)
+- ✅ Slippage protection (didn't exist in V2)
+- ✅ Higher test coverage (65+ tests vs ~77 in V2)
 
-**Tests de Compatibilidad:**
-- `test_Withdraw_Success()` - Línea 302
-- `test_Pause_Success()` - Línea 428
-- `test_EmergencyWithdraw_Token()` - Línea 452
+**Compatibility Tests:**
+- `test_Withdraw_Success()` - Line 302
+- `test_Pause_Success()` - Line 428
+- `test_EmergencyWithdraw_Token()` - Line 452
 
 ---
 
-### 4. Respetar el límite del banco (Bank Cap) ✅
+### 4. Respect the bank cap limit ✅
 
-**Implementación:**
-- ✅ `bankCapUSD` - Capacidad máxima en USD (6 decimals)
-- ✅ `totalBankValueUSD` - Tracking del valor total
-- ✅ Validación **POST-SWAP** del bank cap
-- ✅ Revert si depósito excede capacidad
+**Implementation:**
+- ✅ `bankCapUSD` - Maximum capacity in USD (6 decimals)
+- ✅ `totalBankValueUSD` - Total value tracking
+- ✅ **POST-SWAP** bank cap validation
+- ✅ Revert if deposit exceeds capacity
 
-**Lógica de Validación:**
+**Validation Logic:**
 ```solidity
-// Obtener USDC esperado del swap
+// Get expected USDC from swap
 uint256 expectedUSDC = getExpectedUSDC(tokenIn, amountIn);
 
-// Validar bank cap ANTES del swap
+// Validate bank cap BEFORE swap
 if (totalBankValueUSD + expectedUSDC > bankCapUSD)
     revert BankCapExceeded();
 ```
 
-**Punto Crítico:**
-La validación ocurre ANTES del swap pero DESPUÉS de estimar el output. Esto garantiza que:
-1. No se ejecute el swap si va a exceder el cap
-2. El cálculo incluye el USDC real que se recibirá
-3. No hay race conditions (validación atómica)
+**Critical Point:**
+Validation occurs BEFORE the swap but AFTER estimating the output. This ensures that:
+1. The swap is not executed if it will exceed the cap
+2. The calculation includes the actual USDC to be received
+3. No race conditions (atomic validation)
 
-**Ubicación en código:**
-- [src/KipuBankV3.sol:249-251](src/KipuBankV3.sol) - Validación ETH
-- [src/KipuBankV3.sol:349-351](src/KipuBankV3.sol) - Validación Tokens
+**Code Location:**
+- [src/KipuBankV3.sol:249-251](src/KipuBankV3.sol) - ETH Validation
+- [src/KipuBankV3.sol:349-351](src/KipuBankV3.sol) - Token Validation
 - [src/KipuBankV3.sol:546-561](src/KipuBankV3.sol) - `setBankCap()`
 
 **Tests:**
-- `test_DepositETH_RevertsOnBankCapExceeded()` - Línea 212
-- `test_SetBankCap_Success()` - Línea 381
+- `test_DepositETH_RevertsOnBankCapExceeded()` - Line 212
+- `test_SetBankCap_Success()` - Line 381
 
 ---
 
-### 5. Alcanzar un 50% de cobertura de pruebas ✅
+### 5. Achieve 50% test coverage ✅
 
-**Cobertura Lograda: ~78%** (Excede requisito del 50%)
+**Coverage Achieved: ~78%** (Exceeds 50% requirement)
 
-**Estadísticas de Tests:**
+**Test Statistics:**
 - **Total Tests**: 65+
-- **Líneas Cubiertas**: ~78%
-- **Statements Cubiertos**: ~80%
-- **Branches Cubiertos**: ~65%
-- **Funciones Cubiertas**: ~86%
+- **Lines Covered**: ~78%
+- **Statements Covered**: ~80%
+- **Branches Covered**: ~65%
+- **Functions Covered**: ~86%
 
-**Desglose de Tests:**
+**Test Breakdown:**
 
-| Categoría | Tests | Archivo |
+| Category | Tests | File |
 |-----------|-------|---------|
 | Constructor & Init | 6 | KipuBankV3.t.sol:83-146 |
 | Deposit ETH | 6 | KipuBankV3.t.sol:150-218 |
@@ -160,33 +160,33 @@ La validación ocurre ANTES del swap pero DESPUÉS de estimar el output. Esto ga
 | Fuzz Tests | 3 | KipuBankV3.t.sol:549-589 |
 | Receive/Fallback | 2 | KipuBankV3.t.sol:593-605 |
 
-**Tipos de Tests Implementados:**
+**Types of Tests Implemented:**
 
-1. **Unit Tests** - Prueba cada función individualmente
-2. **Integration Tests** - Flujos completos end-to-end
-3. **Fuzz Tests** - Propiedades invariantes con inputs aleatorios
-4. **Negative Tests** - Casos de error y reverts
-5. **Access Control Tests** - Validación de permisos
-6. **Edge Case Tests** - Límites y casos extremos
+1. **Unit Tests** - Test each function individually
+2. **Integration Tests** - Complete end-to-end flows
+3. **Fuzz Tests** - Invariant properties with random inputs
+4. **Negative Tests** - Error and revert cases
+5. **Access Control Tests** - Permission validation
+6. **Edge Case Tests** - Limits and extreme cases
 
-**Comando para verificar cobertura:**
+**Command to verify coverage:**
 ```bash
 forge coverage --report summary
 
-# Resultado esperado:
+# Expected result:
 # src/KipuBankV3.sol | 78.26% | 80.43% | 65.00% | 85.71%
 ```
 
-**Tests Destacados:**
-- `test_Integration_MultipleUsersDepositsAndWithdrawals()` - Línea 512
-- `test_Integration_TokenSwapFlow()` - Línea 532
-- `testFuzz_DepositETH()` - Línea 549
+**Featured Tests:**
+- `test_Integration_MultipleUsersDepositsAndWithdrawals()` - Line 512
+- `test_Integration_TokenSwapFlow()` - Line 532
+- `testFuzz_DepositETH()` - Line 549
 
 ---
 
-## 🏗️ Arquitectura Técnica
+## 🏗️ Technical Architecture
 
-### Componentes Principales
+### Main Components
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -217,106 +217,106 @@ forge coverage --report summary
 └──────────────┘    └──────────────┘    └──────────────┘
 ```
 
-### Estado del Contrato
+### Contract State
 
 ```solidity
-// Inmutables (gas efficient)
+// Immutables (gas efficient)
 address public immutable ethUsdPriceFeed;
 address public immutable uniswapRouter;
 address public immutable usdc;
 
-// Estado del Banco
-uint256 public bankCapUSD;          // Capacidad máxima
-uint256 public totalBankValueUSD;   // Valor total actual
-uint256 public withdrawalLimitUSD;  // Límite por retiro
-uint256 public slippageToleranceBps; // Tolerancia de slippage
+// Bank State
+uint256 public bankCapUSD;          // Maximum capacity
+uint256 public totalBankValueUSD;   // Current total value
+uint256 public withdrawalLimitUSD;  // Per withdrawal limit
+uint256 public slippageToleranceBps; // Slippage tolerance
 
-// Mapeos
-mapping(address => uint256) public balances;  // Usuario → Balance USDC
+// Mappings
+mapping(address => uint256) public balances;  // User → USDC Balance
 mapping(address => TokenInfo) public tokenInfo; // Token → Info
-address[] public supportedTokens;              // Array de tokens
+address[] public supportedTokens;              // Token array
 ```
 
 ---
 
-## 🔒 Seguridad Implementada
+## 🔒 Implemented Security
 
-### Patrones de Seguridad
+### Security Patterns
 
 1. **ReentrancyGuard** ✅
-   - Todas las funciones state-changing protegidas
-   - `nonReentrant` modifier consistente
+   - All state-changing functions protected
+   - Consistent `nonReentrant` modifier
 
 2. **CEI Pattern** ✅
-   - Checks (validaciones)
-   - Effects (actualizar estado)
-   - Interactions (llamadas externas)
+   - Checks (validations)
+   - Effects (update state)
+   - Interactions (external calls)
 
 3. **Access Control** ✅
    - Admin role: pause, emergencyWithdraw
    - Manager role: addToken, setBankCap, setSlippage
 
 4. **Input Validation** ✅
-   - `nonZeroAmount`: Rechaza montos zero
-   - `nonZeroAddress`: Rechaza direcciones zero
-   - Validación de decimals (1-18)
+   - `nonZeroAmount`: Rejects zero amounts
+   - `nonZeroAddress`: Rejects zero addresses
+   - Decimals validation (1-18)
 
 5. **Oracle Security** ✅
-   - Staleness check (< 1 hora)
+   - Staleness check (< 1 hour)
    - roundId validation
-   - Precio mínimo válido ($1)
+   - Minimum valid price ($1)
 
 6. **Token Safety** ✅
-   - SafeERC20 para todas las transferencias
-   - forceApprove para evitar issues con tokens non-standard
+   - SafeERC20 for all transfers
+   - forceApprove to avoid issues with non-standard tokens
 
-### Vectores de Ataque Mitigados
+### Mitigated Attack Vectors
 
-| Ataque | Mitigación | Ubicación |
+| Attack | Mitigation | Location |
 |--------|-----------|-----------|
-| Reentrancy | ReentrancyGuard | Toda función |
+| Reentrancy | ReentrancyGuard | All functions |
 | Oracle Manipulation | Staleness + validation | `_getETHPrice()` |
 | Slippage Attack | Tolerance check | Swap functions |
 | Access Control Bypass | Role-based permissions | Admin/Manager functions |
 | DoS (Gas Limit) | MAX_SUPPORTED_TOKENS (50) | Constructor |
-| Precision Loss | USD con 6 decimals | Conversiones |
+| Precision Loss | USD with 6 decimals | Conversions |
 
 ---
 
-## 📚 Documentación Completa
+## 📚 Complete Documentation
 
-### Archivos de Documentación
+### Documentation Files
 
-1. **README.md** (7,000+ líneas)
-   - Resumen ejecutivo
-   - Guía de instalación
-   - Interacción con contrato
-   - Análisis de amenazas completo
-   - Decisiones de diseño explicadas
+1. **README.md** (7,000+ lines)
+   - Executive summary
+   - Installation guide
+   - Contract interaction
+   - Complete threat analysis
+   - Explained design decisions
 
-2. **DEPLOYMENT.md** (400+ líneas)
-   - Guía paso a paso de deployment
-   - Sepolia y Mainnet
+2. **DEPLOYMENT.md** (400+ lines)
+   - Step-by-step deployment guide
+   - Sepolia and Mainnet
    - Troubleshooting
    - Post-deployment checklist
 
-3. **QUICKSTART.md** (200+ líneas)
-   - Setup en 5 minutos
-   - Ejemplos prácticos
+3. **QUICKSTART.md** (200+ lines)
+   - 5-minute setup
+   - Practical examples
    - FAQ
 
-4. **SECURITY.md** (200+ líneas)
-   - Política de divulgación responsable
+4. **SECURITY.md** (200+ lines)
+   - Responsible disclosure policy
    - Bug bounty program
-   - Issues conocidos
+   - Known issues
 
-5. **IMPLEMENTATION_SUMMARY.md** (este archivo)
-   - Resumen técnico completo
-   - Cumplimiento de objetivos
+5. **IMPLEMENTATION_SUMMARY.md** (this file)
+   - Complete technical summary
+   - Objectives compliance
 
-### NatSpec Completo
+### Complete NatSpec
 
-Todas las funciones incluyen documentación NatSpec completa:
+All functions include complete NatSpec documentation:
 
 ```solidity
 /**
@@ -339,22 +339,22 @@ function depositToken(address token, uint256 amount) external { ... }
 
 ---
 
-## 📊 Métricas del Proyecto
+## 📊 Project Metrics
 
-### Líneas de Código
+### Lines of Code
 
-| Archivo | Líneas | Descripción |
+| File | Lines | Description |
 |---------|--------|-------------|
-| KipuBankV3.sol | 800+ | Contrato principal |
-| IKipuBankV3.sol | 200+ | Interface principal |
-| IUniswapV2Router02.sol | 80+ | Interface Uniswap |
-| KipuBankV3.t.sol | 600+ | Suite de tests |
+| KipuBankV3.sol | 800+ | Main contract |
+| IKipuBankV3.sol | 200+ | Main interface |
+| IUniswapV2Router02.sol | 80+ | Uniswap interface |
+| KipuBankV3.t.sol | 600+ | Test suite |
 | Mocks | 200+ | MockERC20, MockRouter, etc |
-| **TOTAL** | **~2000** | Líneas de Solidity |
+| **TOTAL** | **~2000** | Solidity lines |
 
-### Documentación
+### Documentation
 
-| Archivo | Líneas | Palabras |
+| File | Lines | Words |
 |---------|--------|----------|
 | README.md | 1,400+ | 12,000+ |
 | DEPLOYMENT.md | 700+ | 6,000+ |
@@ -365,145 +365,145 @@ function depositToken(address token, uint256 amount) external { ... }
 ### Tests
 
 - **Total Tests**: 65+
-- **Líneas de Tests**: 600+
-- **Cobertura**: 78%
-- **Gas Report**: Disponible con `make gas-report`
+- **Test Lines**: 600+
+- **Coverage**: 78%
+- **Gas Report**: Available with `make gas-report`
 
 ---
 
-## 🎯 Decisiones de Diseño Clave
+## 🎯 Key Design Decisions
 
-### 1. Balance Unificado en USDC
+### 1. Unified Balance in USDC
 
-**Decisión**: Todos los depósitos → USDC
+**Decision**: All deposits → USDC
 
-**Ventajas:**
-- Simplicidad para frontend (un solo balance)
-- Estabilidad (USDC es stablecoin)
-- Gas efficient (un storage slot por usuario)
-
-**Trade-off:**
-- Swap fees en cada depósito
-- Usuario no puede recuperar token original
-
-### 2. Uniswap V2 (no V3)
-
-**Decisión**: Integrar V2 en lugar de V3
-
-**Ventajas:**
-- Simplicidad (no ticks ni ranges)
-- Documentación madura
-- Suficiente para MVP
+**Advantages:**
+- Simplicity for frontend (single balance)
+- Stability (USDC is stablecoin)
+- Gas efficient (one storage slot per user)
 
 **Trade-off:**
-- Peor precio de ejecución vs V3
+- Swap fees on each deposit
+- User cannot recover original token
 
-### 3. Slippage Configurable
+### 2. Uniswap V2 (not V3)
 
-**Decisión**: Manager puede ajustar slippage
+**Decision**: Integrate V2 instead of V3
 
-**Ventajas:**
-- Flexibilidad según volatilidad
-- Optimización de costos
-
-**Trade-off:**
-- Requiere monitoreo activo
-
-### 4. Withdrawal Solo USDC
-
-**Decisión**: Retiros solo en USDC
-
-**Ventajas:**
-- Simplicidad
-- Menos superficie de ataque
+**Advantages:**
+- Simplicity (no ticks or ranges)
+- Mature documentation
+- Sufficient for MVP
 
 **Trade-off:**
-- Menos flexible que V2
+- Worse execution price vs V3
+
+### 3. Configurable Slippage
+
+**Decision**: Manager can adjust slippage
+
+**Advantages:**
+- Flexibility according to volatility
+- Cost optimization
+
+**Trade-off:**
+- Requires active monitoring
+
+### 4. USDC-Only Withdrawals
+
+**Decision**: Withdrawals only in USDC
+
+**Advantages:**
+- Simplicity
+- Less attack surface
+
+**Trade-off:**
+- Less flexible than V2
 
 ---
 
-## 🚀 Próximos Pasos
+## 🚀 Next Steps
 
 ### Pre-Mainnet
 
-- [ ] Auditoría profesional (Code4rena, OpenZeppelin)
+- [ ] Professional audit (Code4rena, OpenZeppelin)
 - [ ] Bug bounty program ($50k+)
-- [ ] Multisig para admin role
-- [ ] Monitoreo (Tenderly, Defender)
+- [ ] Multisig for admin role
+- [ ] Monitoring (Tenderly, Defender)
 
 ### Post-Mainnet
 
 - [ ] Uniswap V3 integration
 - [ ] Yield farming (Aave, Compound)
 - [ ] Multi-chain (Polygon, Arbitrum)
-- [ ] Gobernanza DAO
+- [ ] DAO governance
 
 ---
 
-## 📞 Información del Proyecto
+## 📞 Project Information
 
-- **Autor**: Hernan Herrera
-- **Organización**: White Paper
+- **Author**: Hernan Herrera
+- **Organization**: White Paper
 - **Email**: hernanherrera@whitepaper.com
-- **Soporte**: support@whitepaper.com
+- **Support**: support@whitepaper.com
 - **Security**: security@whitepaper.com
-- **Repositorio**: https://github.com/your-username/KipuBankV3
-- **Documentación**: Ver README.md
+- **Repository**: https://github.com/your-username/KipuBankV3
+- **Documentation**: See README.md
 - **Tests**: `forge test`
-- **Cobertura**: `forge coverage`
-- **Deploy**: Ver DEPLOYMENT.md
+- **Coverage**: `forge coverage`
+- **Deploy**: See DEPLOYMENT.md
 
 ---
 
-## ✅ Checklist Final del Examen
+## ✅ Final Exam Checklist
 
-### Requisitos Técnicos
+### Technical Requirements
 
-- [x] Manejar cualquier token de Uniswap V2
-- [x] Ejecutar swaps automáticos a USDC
-- [x] Preservar funcionalidad de KipuBankV2
-- [x] Respetar bank cap post-swap
-- [x] Cobertura de tests ≥ 50%
+- [x] Handle any Uniswap V2 token
+- [x] Execute automatic swaps to USDC
+- [x] Preserve KipuBankV2 functionality
+- [x] Respect bank cap post-swap
+- [x] Test coverage ≥ 50%
 
-### Requisitos de Documentación
+### Documentation Requirements
 
-- [x] README.md con explicación de alto nivel
-- [x] Instrucciones de deployment
-- [x] Decisiones de diseño documentadas
-- [x] Análisis de amenazas completo
-- [x] Cobertura de pruebas documentada
-- [x] Métodos de prueba explicados
+- [x] README.md with high-level explanation
+- [x] Deployment instructions
+- [x] Documented design decisions
+- [x] Complete threat analysis
+- [x] Documented test coverage
+- [x] Explained testing methods
 
-### Entregables
+### Deliverables
 
-- [x] Contrato en `/src`
-- [x] Tests en `/test`
-- [x] Script de deployment
-- [x] README.md completo
-- [x] Análisis de seguridad
-- [ ] URL de contrato verificado (requiere deployment)
-
----
-
-## 🏆 Resumen de Logros
-
-### Requisitos Cumplidos: 5/5 ✅
-
-1. ✅ **Tokens Multi-Uniswap**: Cualquier token con par USDC
-2. ✅ **Swaps Automáticos**: Integración completa con Uniswap V2
-3. ✅ **Funcionalidad V2**: Todas las features preservadas
-4. ✅ **Bank Cap**: Validación post-swap implementada
-5. ✅ **Cobertura**: 78% (excede el 50% requerido)
-
-### Extras Implementados
-
-- ✅ Documentación exhaustiva (2600+ líneas)
-- ✅ Slippage protection configurable
-- ✅ Tests de integración y fuzz
-- ✅ Análisis de amenazas detallado
-- ✅ Guías de deployment completas
-- ✅ Scripts y Makefile para facilitar uso
+- [x] Contract in `/src`
+- [x] Tests in `/test`
+- [x] Deployment script
+- [x] Complete README.md
+- [x] Security analysis
+- [ ] Verified contract URL (requires deployment)
 
 ---
 
-**KipuBankV3 está listo para evaluación y deployment en testnet.** 🎉
+## 🏆 Summary of Achievements
+
+### Requirements Met: 5/5 ✅
+
+1. ✅ **Multi-Uniswap Tokens**: Any token with USDC pair
+2. ✅ **Automatic Swaps**: Complete integration with Uniswap V2
+3. ✅ **V2 Functionality**: All features preserved
+4. ✅ **Bank Cap**: Post-swap validation implemented
+5. ✅ **Coverage**: 78% (exceeds required 50%)
+
+### Implemented Extras
+
+- ✅ Exhaustive documentation (2600+ lines)
+- ✅ Configurable slippage protection
+- ✅ Integration and fuzz tests
+- ✅ Detailed threat analysis
+- ✅ Complete deployment guides
+- ✅ Scripts and Makefile for easy use
+
+---
+
+**KipuBankV3 is ready for evaluation and testnet deployment.** 🎉

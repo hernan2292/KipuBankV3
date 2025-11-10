@@ -1,196 +1,196 @@
-# Correcciones Realizadas - KipuBankV3
+# Corrections Made - KipuBankV3
 
-**Autor**: Hernan Herrera
-**Organización**: White Paper
-**Fecha**: 2025-11-09
+**Author**: Hernan Herrera  
+**Organization**: White Paper  
+**Date**: 2025-11-09
 
-Este documento detalla todas las correcciones realizadas basadas en el feedback del trabajo anterior (KipuBankV2).
+This document details all the corrections made based on the feedback from the previous work (KipuBankV2).
 
 ---
 
-## ✅ Problemas Corregidos
+## ✅ Corrected Issues
 
-### 1. ❌ Emisión de Valores Constantes/Immutables en Eventos
+### 1. ❌ Emitting Constant/Immutable Values in Events
 
-**Problema Original:**
+**Original Problem:**
 ```solidity
-// ❌ INCORRECTO - Emitiendo cache de immutable
+// ❌ INCORRECT - Emitting immutable cache
 address cachedUsdc = usdc;
 emit TokenSwapped(msg.sender, NATIVE_TOKEN, cachedUsdc, msg.value, usdcReceived);
 ```
 
-**Razón del Error:**
-- Los valores `immutable` y `constant` **nunca cambian**
-- Emitirlos en eventos es un **desperdicio de gas** innecesario
-- No hay razón para indexar/registrar valores que son conocidos de antemano
+**Reason for the Error:**
+- `immutable` and `constant` values **never change**.
+- Emitting them in events is an unnecessary **gas waste**.
+- There’s no reason to index/register values that are known beforehand.
 
-**Corrección:**
+**Fix:**
 ```solidity
-// ✅ CORRECTO - Usar immutable directamente
+// ✅ CORRECT - Use immutable directly
 emit TokenSwapped(msg.sender, NATIVE_TOKEN, usdc, msg.value, usdcReceived);
 ```
 
-**Archivos Corregidos:**
-- `depositETH()` - Línea 272-279
-- `depositToken()` - Línea 381-387
-- `withdraw()` - Línea 465
+**Files Corrected:**
+- `depositETH()` – Lines 272‑279
+- `depositToken()` – Lines 381‑387
+- `withdraw()` – Line 465
 
-**Ahorro de Gas:** ~800 gas por transacción (eliminar copia de stack innecesaria)
+**Gas Savings:** ~800 gas per transaction (removing unnecessary stack copy).
 
 ---
 
-### 2. ❌ Múltiples Accesos a Variables de Estado
+### 2. ❌ Multiple Accesses to State Variables
 
-**Problema Original:**
+**Original Problem:**
 ```solidity
-// ❌ INCORRECTO - 3 lecturas de storage
-uint256 oldCap = bankCapUSD;  // Primera lectura
+// ❌ INCORRECT - 3 storage reads
+uint256 oldCap = bankCapUSD;  // First read
 if (newCapUSD < totalBankValueUSD) revert InvalidBankCap();
-bankCapUSD = newCapUSD;  // Segunda lectura implícita
-emit BankCapUpdated(oldCap, newCapUSD);  // oldCap ya fue leído
+bankCapUSD = newCapUSD;  // Second implicit read
+emit BankCapUpdated(oldCap, newCapUSD);  // oldCap already read
 ```
 
-**Razón del Error:**
-- Cada lectura de storage cuesta **2100 gas** (SLOAD)
-- Múltiples lecturas de la misma variable **multiplican el costo**
-- Es un **error crítico** de optimización
+**Reason for the Error:**
+- Each storage read costs **2100 gas** (SLOAD).
+- Multiple reads of the same variable **multiply the cost**.
+- A critical optimization error.
 
-**Corrección:**
+**Fix:**
 ```solidity
-// ✅ CORRECTO - 1 lectura de storage cada una
-uint256 cachedOldCap = bankCapUSD;      // UNA lectura
-uint256 cachedTotalValue = totalBankValueUSD;  // UNA lectura
+// ✅ CORRECT - One storage read each
+uint256 cachedOldCap = bankCapUSD;      // One read
+uint256 cachedTotalValue = totalBankValueUSD;  // One read
 
 if (newCapUSD < cachedTotalValue) revert InvalidBankCap();
-bankCapUSD = newCapUSD;  // UNA escritura (no lectura)
+bankCapUSD = newCapUSD;  // One write (no read)
 emit BankCapUpdated(cachedOldCap, newCapUSD);
 ```
 
-**Funciones Corregidas:**
+**Functions Corrected:**
 
-#### a) `depositETH()` - Líneas 210-280
+#### a) `depositETH()` – Lines 210‑280
 ```solidity
-// Antes: Múltiples lecturas de tokenInfo[NATIVE_TOKEN]
-TokenStatus status = tokenInfo[NATIVE_TOKEN].status;  // Primera lectura
-// ... más adelante
-tokenInfo[NATIVE_TOKEN].totalDeposits += ...;  // Segunda lectura
-tokenInfo[NATIVE_TOKEN].depositCount++;        // Tercera lectura
+// Before: Multiple reads of tokenInfo[NATIVE_TOKEN]
+TokenStatus status = tokenInfo[NATIVE_TOKEN].status;  // First read
+// ... later
+tokenInfo[NATIVE_TOKEN].totalDeposits += ...;  // Second read
+tokenInfo[NATIVE_TOKEN].depositCount++;        // Third read
 
-// Después: UNA lectura, trabajar en memoria
-TokenInfo memory nativeTokenInfo = tokenInfo[NATIVE_TOKEN];  // UNA lectura
+// After: ONE read, work in memory
+TokenInfo memory nativeTokenInfo = tokenInfo[NATIVE_TOKEN];  // One read
 if (nativeTokenInfo.status != TokenStatus.Active) revert TokenPaused();
-// ... calcular nuevos valores
+// ... calculate new values
 unchecked {
     tokenInfo[NATIVE_TOKEN].totalDeposits = nativeTokenInfo.totalDeposits + uint128(usdcReceived);
     tokenInfo[NATIVE_TOKEN].depositCount = nativeTokenInfo.depositCount + 1;
-}  // UNA escritura
+}  // One write
 ```
 
-#### b) `depositToken()` - Líneas 303-406
+#### b) `depositToken()` – Lines 303‑406
 ```solidity
-// Antes: Múltiples lecturas y escrituras
-TokenInfo storage info = tokenInfo[token];  // Puntero a storage
+// Before: Multiple reads and writes
+TokenInfo storage info = tokenInfo[token];  // Storage pointer
 if (!info.isSupported) revert TokenNotSupported();
-// ... más adelante
-info.totalDeposits += uint128(usdcAmount);  // Escritura 1
-info.depositCount++;                         // Escritura 2
+// ... later
+info.totalDeposits += uint128(usdcAmount);  // Write 1
+info.depositCount++;                         // Write 2
 
-// Después: UNA lectura, UNA escritura
-TokenInfo memory info = tokenInfo[token];  // UNA lectura (copia a memoria)
+// After: ONE read, ONE write
+TokenInfo memory info = tokenInfo[token];  // One read (copy to memory)
 if (!info.isSupported) revert TokenNotSupported();
-// ... calcular nuevos valores
+// ... calculate new values
 unchecked {
     tokenInfo[token].totalDeposits = info.totalDeposits + uint128(usdcAmount);
     tokenInfo[token].depositCount = info.depositCount + 1;
-}  // UNA escritura (struct completo)
+}  // One write (full struct)
 ```
 
-#### c) `withdraw()` - Líneas 428-466
+#### c) `withdraw()` – Lines 428‑466
 ```solidity
-// Antes: Múltiples lecturas/escrituras
-uint256 userBalance = balances[msg.sender];  // Lectura 1
-balances[msg.sender] = userBalance - amount; // Escritura
-totalBankValueUSD -= amount;  // Lectura implícita + Escritura
-tokenInfo[usdc].withdrawalCount++;  // Lectura + Escritura
+// Before: Multiple reads/writes
+uint256 userBalance = balances[msg.sender];  // Read 1
+balances[msg.sender] = userBalance - amount; // Write
+totalBankValueUSD -= amount;  // Implicit read + write
+tokenInfo[usdc].withdrawalCount++;  // Read + write
 
-// Después: Cachear todo, una escritura cada variable
-uint256 userBalance = balances[msg.sender];        // UNA lectura
-uint256 cachedTotalValue = totalBankValueUSD;     // UNA lectura
-uint256 cachedWithdrawalLimit = withdrawalLimitUSD; // UNA lectura
+// After: Cache everything, one write per variable
+uint256 userBalance = balances[msg.sender];        // ONE read
+uint256 cachedTotalValue = totalBankValueUSD;     // ONE read
+uint256 cachedWithdrawalLimit = withdrawalLimitUSD; // ONE read
 
-// Validaciones con valores cacheados
+// Validations with cached values
 // ...
 
-// UNA escritura cada variable
-balances[msg.sender] = userBalance - amount;  // UNA escritura
-totalBankValueUSD = cachedTotalValue - amount; // UNA escritura
-tokenInfo[cachedUsdc].withdrawalCount++;      // UNA escritura
+// ONE write each variable
+balances[msg.sender] = userBalance - amount;  // ONE write
+totalBankValueUSD = cachedTotalValue - amount; // ONE write
+tokenInfo[cachedUsdc].withdrawalCount++;      // ONE write
 ```
 
-#### d) `setBankCap()` - Líneas 540-556
+#### d) `setBankCap()` – Lines 540‑556
 ```solidity
-// Antes: 2 lecturas de bankCapUSD
-uint256 oldCap = bankCapUSD;  // Lectura 1
-bankCapUSD = newCapUSD;       // Lectura implícita antes de escritura
+// Before: 2 reads of bankCapUSD
+uint256 oldCap = bankCapUSD;  // Read 1
+bankCapUSD = newCapUSD;       // Implicit read before write
 
-// Después: 1 lectura
-uint256 cachedOldCap = bankCapUSD;  // UNA lectura
-bankCapUSD = newCapUSD;              // UNA escritura (sin lectura previa)
+// After: 1 read
+uint256 cachedOldCap = bankCapUSD;  // ONE read
+bankCapUSD = newCapUSD;              // ONE write (no previous read)
 ```
 
-#### e) `setWithdrawalLimit()` - Líneas 568-584
+#### e) `setWithdrawalLimit()` – Lines 568‑584
 ```solidity
-// Antes: 2 lecturas
-uint256 oldLimit = withdrawalLimitUSD;  // Lectura 1
-if (newLimitUSD > bankCapUSD) revert;   // Lectura de bankCapUSD
-withdrawalLimitUSD = newLimitUSD;       // Lectura implícita
+// Before: 2 reads
+uint256 oldLimit = withdrawalLimitUSD;  // Read 1
+if (newLimitUSD > bankCapUSD) revert;   // Read of bankCapUSD
+withdrawalLimitUSD = newLimitUSD;       // Implicit read
 
-// Después: 1 lectura de cada
-uint256 cachedOldLimit = withdrawalLimitUSD;  // UNA lectura
-uint256 cachedBankCap = bankCapUSD;           // UNA lectura
-// ... validaciones con valores cacheados
-withdrawalLimitUSD = newLimitUSD;             // UNA escritura
+// After: 1 read of each
+uint256 cachedOldLimit = withdrawalLimitUSD;  // ONE read
+uint256 cachedBankCap = bankCapUSD;           // ONE read
+// ... validations with cached values
+withdrawalLimitUSD = newLimitUSD;             // ONE write
 ```
 
-#### f) `setSlippageTolerance()` - Líneas 595-609
+#### f) `setSlippageTolerance()` – Lines 595‑609
 ```solidity
-// Antes: 2 lecturas
-uint256 oldSlippage = slippageToleranceBps;  // Lectura 1
-slippageToleranceBps = newSlippageBps;       // Lectura implícita
+// Before: 2 reads
+uint256 oldSlippage = slippageToleranceBps;  // Read 1
+slippageToleranceBps = newSlippageBps;       // Implicit read
 
-// Después: 1 lectura
-uint256 cachedOldSlippage = slippageToleranceBps;  // UNA lectura
-slippageToleranceBps = newSlippageBps;              // UNA escritura
+// After: 1 read
+uint256 cachedOldSlippage = slippageToleranceBps;  // ONE read
+slippageToleranceBps = newSlippageBps;              // ONE write
 ```
 
-**Ahorro de Gas Total:** ~20,000-40,000 gas por transacción (dependiendo de la función)
+**Total Gas Savings:** ~20,000‑40,000 gas per transaction (depends on the function).
 
 ---
 
-### 3. ❌ Uso Incorrecto de `unchecked`
+### 3. ❌ Incorrect Use of `unchecked`
 
-**Problema Original:**
+**Original Problem:**
 ```solidity
-// ❌ INCORRECTO - No usar unchecked cuando es seguro
-balances[msg.sender] = userBalance - amount;  // Desperdicio: validamos antes
-totalBankValueUSD += usdcReceived;  // Desperdicio: suma simple
+// ❌ INCORRECT - Not using unchecked when safe
+balances[msg.sender] = userBalance - amount;  // Wasteful: we validated before
+totalBankValueUSD += usdcReceived;  // Wasteful: simple addition
 
-// ❌ INCORRECTO - Usar unchecked cuando NO es seguro
+// ❌ INCORRECT - Using unchecked when NOT safe
 unchecked {
-    uint256 x = someValue * someOtherValue;  // Podría overflow si valores grandes
+    uint256 x = someValue * someOtherValue;  // Could overflow with large values
 }
 ```
 
-**Razón del Error:**
-- `unchecked` elimina **overflow/underflow checks** (ahorra ~200 gas por operación)
-- Solo debe usarse cuando **matemáticamente imposible** el overflow/underflow
-- Usar incorrectamente puede causar **vulnerabilidades críticas**
+**Reason for the Error:**
+- `unchecked` removes **overflow/underflow checks** (saving ~200 gas per operation).
+- It should only be used when **mathematically impossible** for overflow/underflow.
+- Incorrect usage can lead to **critical vulnerabilities**.
 
-**Corrección - Casos SEGUROS para unchecked:**
+**Fix – SAFE Cases for `unchecked`:**
 
-#### a) Resta después de validación
+#### a) Subtraction after validation
 ```solidity
-// ✅ SEGURO - Validamos userBalance >= amount antes
+// ✅ SAFE - We validated userBalance >= amount beforehand
 if (userBalance < amount) revert InsufficientBalance();
 
 unchecked {
@@ -199,187 +199,109 @@ unchecked {
 }
 ```
 
-#### b) Resta con constantes
+#### b) Subtraction with constants
 ```solidity
-// ✅ SEGURO - MAX_BPS es 10000, slippageTolerance <= MAX_BPS (validado en setter)
+// ✅ SAFE - MAX_BPS is 10000, slippageTolerance <= MAX_BPS (validated in setter)
 unchecked {
     minUSDC = (expectedUSDC * (MAX_BPS - cachedSlippageTolerance)) / MAX_BPS;
     // Safe: (MAX_BPS - slippageTolerance) cannot underflow
 }
 ```
 
-#### c) Incrementos que no pueden overflow
+#### c) Increments that cannot overflow
 ```solidity
-// ✅ SEGURO - depositCount es uint64, nunca llegará a 2^64-1 depósitos
+// ✅ SAFE - depositCount is uint64, will never reach 2^64‑1 deposits
 unchecked {
     tokenInfo[token].depositCount = info.depositCount + 1;
     // Safe: depositCount won't overflow uint64 in any realistic scenario
 }
 ```
 
-#### d) Totales con límites conocidos
+#### d) Totals with known limits
 ```solidity
-// ✅ SEGURO - totalDeposits es uint128, limitado por bankCap (uint256 pero en rango)
+// ✅ SAFE - totalDeposits is uint128, limited by bankCap (uint256 but within range)
 unchecked {
     tokenInfo[token].totalDeposits = info.totalDeposits + uint128(usdcAmount);
     // Safe: totalDeposits can't realistically overflow uint128 (bankCap limits total)
 }
 ```
 
-**Funciones con `unchecked` Aplicado:**
+**Functions with `unchecked` Applied:**
 
-1. **`depositETH()`** - Líneas 231-235, 264-269
-   - Cálculo de slippage: `MAX_BPS - cachedSlippageTolerance`
-   - Incremento de contadores
+1. **`depositETH()`** – Lines 231‑235, 264‑269
+   - Slippage calculation: `MAX_BPS - cachedSlippageTolerance`
+   - Counter increments
 
-2. **`depositToken()`** - Líneas 352-356, 397-402
-   - Cálculo de slippage
-   - Incremento de contadores
+2. **`depositToken()`** – Lines 352‑356, 397‑402
+   - Slippage calculation
+   - Counter increments
 
-3. **`withdraw()`** - Líneas 444-453, 456-458
-   - Resta de balances: `userBalance - amount`
-   - Resta de total: `cachedTotalValue - amount`
-   - Incremento de contador
+3. **`withdraw()`** – Lines 444‑453, 456‑458
+   - Balance subtraction: `userBalance - amount`
+   - Total value subtraction: `cachedTotalValue - amount`
+   - Counter increment
 
-**Ahorro de Gas:** ~600-800 gas por transacción (3-4 operaciones × 200 gas)
+**Gas Savings:** ~600‑800 gas per transaction (3‑4 ops × 200 gas).
 
 ---
 
-### 4. ✅ Validación de Monto Cero (Ya Correcta)
+### 4. ✅ Zero‑Amount Validation (Already Correct)
 
-**Implementación Actual:**
+**Current Implementation:**
 ```solidity
 modifier nonZeroAmount(uint256 amount) {
     if (amount == 0) revert ZeroAmount();
     _;
 }
 
-// Aplicado en todas las funciones relevantes:
+// Applied to all relevant functions:
 function depositETH() external payable nonZeroAmount(msg.value) { ... }
 function depositToken(..., uint256 amount) external nonZeroAmount(amount) { ... }
 function withdraw(uint256 amount) external nonZeroAmount(amount) { ... }
 function emergencyWithdraw(..., uint256 amount, ...) external nonZeroAmount(amount) { ... }
 ```
 
-**Estado:** ✅ No requiere corrección (ya estaba implementado correctamente)
+**Status:** ✅ No changes needed (already correctly implemented).
 
 ---
 
-## 📊 Resumen de Ahorro de Gas
+## 📊 Gas Savings Summary
 
-| Optimización | Ahorro por TX | Funciones Afectadas |
-|--------------|---------------|---------------------|
-| No emitir immutables en eventos | ~800 gas | 3 funciones |
-| Eliminar lecturas múltiples de storage | ~20,000-40,000 gas | 6 funciones |
-| Uso correcto de `unchecked` | ~600-800 gas | 3 funciones |
-| **TOTAL ESTIMADO** | **~21,400-41,600 gas** | **Todas** |
+| Optimization | Gas Saved per TX | Affected Functions |
+|--------------|------------------|---------------------|
+| No emitting immutables in events | ~800 gas | 3 functions |
+| Eliminating multiple storage reads | ~20,000‑40,000 gas | 6 functions |
+| Correct use of `unchecked` | ~600‑800 gas | 3 functions |
+| **TOTAL ESTIMATED** | **~21,400‑41,600 gas** | **All** |
 
-**Impacto en USD** (asumiendo ETH = $3000, gas price = 50 gwei):
-- Ahorro por depósito: $3.21 - $6.24
-- Ahorro anual (1000 depósitos): $3,210 - $6,240
-
----
-
-## 🔍 Checklist de Validación
-
-### ✅ Problema 1: Emitir Constantes/Immutables
-- [x] `depositETH()` - Línea 275: Usar `usdc` en lugar de `cachedUsdc`
-- [x] `depositToken()` - Línea 384: Usar `usdc` en lugar de `cachedUsdc`
-- [x] `withdraw()` - Línea 465: Usar `usdc` en lugar de `cachedUsdc`
-
-### ✅ Problema 2: Múltiples Accesos a Storage
-- [x] `depositETH()`:
-  - [x] Cachear `bankCapUSD` (línea 211)
-  - [x] Cachear `totalBankValueUSD` (línea 212)
-  - [x] Cachear `slippageToleranceBps` (línea 213)
-  - [x] Cachear `tokenInfo[NATIVE_TOKEN]` a memoria (línea 217)
-  - [x] Una sola escritura de `totalBankValueUSD` (línea 261)
-  - [x] Una sola escritura de `tokenInfo[NATIVE_TOKEN]` (líneas 267-268)
-
-- [x] `depositToken()`:
-  - [x] Cachear `tokenInfo[token]` a memoria (línea 318)
-  - [x] Cachear `bankCapUSD` (línea 325)
-  - [x] Cachear `totalBankValueUSD` (línea 326)
-  - [x] Cachear `slippageToleranceBps` (línea 327)
-  - [x] Una sola escritura de `totalBankValueUSD` (línea 394)
-  - [x] Una sola escritura de `tokenInfo[token]` (líneas 400-401)
-
-- [x] `withdraw()`:
-  - [x] Cachear `balances[msg.sender]` (línea 432)
-  - [x] Cachear `withdrawalLimitUSD` (línea 433)
-  - [x] Cachear `totalBankValueUSD` (línea 434)
-  - [x] Una sola escritura de `balances[msg.sender]` (línea 446)
-  - [x] Una sola escritura de `totalBankValueUSD` (línea 452)
-  - [x] Una sola escritura de `tokenInfo[usdc].withdrawalCount` (línea 458)
-
-- [x] `setBankCap()`:
-  - [x] Cachear `bankCapUSD` (línea 544)
-  - [x] Cachear `totalBankValueUSD` (línea 545)
-  - [x] Una sola escritura de `bankCapUSD` (línea 552)
-
-- [x] `setWithdrawalLimit()`:
-  - [x] Cachear `withdrawalLimitUSD` (línea 572)
-  - [x] Cachear `bankCapUSD` (línea 573)
-  - [x] Una sola escritura de `withdrawalLimitUSD` (línea 580)
-
-- [x] `setSlippageTolerance()`:
-  - [x] Cachear `slippageToleranceBps` (línea 602)
-  - [x] Una sola escritura de `slippageToleranceBps` (línea 605)
-
-### ✅ Problema 3: Uso de `unchecked`
-- [x] `depositETH()`:
-  - [x] Slippage calculation (líneas 231-235)
-  - [x] Counter increments (líneas 264-269)
-
-- [x] `depositToken()`:
-  - [x] Slippage calculation (líneas 352-356)
-  - [x] Counter increments (líneas 397-402)
-
-- [x] `withdraw()`:
-  - [x] Balance subtraction (líneas 444-447)
-  - [x] Total value subtraction (líneas 450-453)
-  - [x] Counter increment (líneas 456-458)
-
-### ✅ Problema 4: Validación nonZeroAmount
-- [x] Ya implementado correctamente (no requiere cambios)
+**Impact on USD** (assuming ETH = $3,000, gas price = 50 gwei):
+- Savings per deposit: $3.21 – $6.24
+- Annual savings (1,000 deposits): $3,210 – $6,240
 
 ---
 
-## 🧪 Tests Actualizados
+## 🔍 Verification Checklist
 
-Todos los tests existentes siguen pasando:
+### ✅ Issue 1: Emitting Constant/Immutable Values
+- [x] `depositETH()` – Line 275: use `usdc` instead of `cachedUsdc`
+- [x] `depositToken()` – Line 384: use `usdc` instead of `cachedUsdc`
+- [x] `withdraw()` – Line 465: use `usdc` instead of `cachedUsdc`
+
+### ✅ Issue 2: Multiple Storage Accesses
+*All cache‑and‑write‑once patterns described above.*
+
+### ✅ Issue 3: `unchecked` Usage
+*All safe `unchecked` blocks described above.*
+
+### ✅ Issue 4: Non‑Zero Amount Validation
+*Already correct.*
+
+---
+
+## 🧪 Updated Tests
+
+All existing tests continue to pass:
+
 ```bash
 forge test
-# [PASS] todos los 65+ tests
-```
-
-**Nota:** Las optimizaciones no cambian la lógica del contrato, solo mejoran el gas.
-
----
-
-## 📝 Comentarios en Código
-
-Todos los bloques `unchecked` incluyen comentarios explicando por qué es seguro:
-
-```solidity
-unchecked {
-    // Safe: MAX_BPS is 10000, slippageTolerance <= MAX_BPS (validated in setter)
-    // Therefore (MAX_BPS - slippageTolerance) cannot underflow
-    minUSDC = (expectedUSDC * (MAX_BPS - cachedSlippageTolerance)) / MAX_BPS;
-}
-```
-
----
-
-## ✅ Verificación Final
-
-**Todas las correcciones del feedback anterior han sido aplicadas:**
-
-1. ✅ **No emitir constantes/immutables** - Corregido en 3 eventos
-2. ✅ **Eliminar múltiples accesos a storage** - Corregido en 6 funciones
-3. ✅ **Uso correcto de `unchecked`** - Aplicado en 7 ubicaciones
-4. ✅ **Validación nonZeroAmount** - Ya estaba correcta
-
-**Gas optimizado:** ~21,400-41,600 gas por transacción
-
-**Código más seguro y eficiente:** ✅
+# [PASS] all 65+ tests

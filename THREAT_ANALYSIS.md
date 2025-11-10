@@ -1,84 +1,84 @@
-# Informe de Análisis de Amenazas - KipuBankV3
+# Threat Analysis Report - KipuBankV3
 
-**Fecha**: 2025-11-09
-**Versión del Contrato**: 1.0.0
-**Autor**: Hernan Herrera
-**Organización**: White Paper
+**Date**: 2025-11-09
+**Contract Version**: 1.0.0
+**Author**: Hernan Herrera
+**Organization**: White Paper
 **Solidity**: 0.8.30
 
 ---
 
-## 📋 Resumen Ejecutivo
+## 📋 Executive Summary
 
-Este documento presenta un análisis exhaustivo de amenazas para el contrato KipuBankV3, identificando vectores de ataque, debilidades del protocolo, pasos faltantes para alcanzar la madurez de producción, cobertura de pruebas y metodología de testing.
+This document presents a comprehensive threat analysis for the KipuBankV3 contract, identifying attack vectors, protocol weaknesses, missing steps to achieve production maturity, test coverage, and testing methodology.
 
-### Estado Actual del Protocolo
+### Current Protocol Status
 
-- ✅ **Compilación**: Sin errores ni warnings
-- ✅ **Tests**: 49/49 pasando (100%)
-- ✅ **Cobertura**: >78% líneas, >80% statements
-- ⚠️ **Auditoría Externa**: Pendiente
-- ⚠️ **Deployment Mainnet**: No recomendado aún
-
----
-
-## 🎯 Objetivos del Análisis
-
-1. Identificar debilidades y vulnerabilidades del protocolo
-2. Analizar vectores de ataque potenciales
-3. Evaluar la madurez del código para producción
-4. Documentar cobertura de pruebas y metodología
-5. Proporcionar un roadmap de mejoras de seguridad
+- ✅ **Compilation**: No errors or warnings
+- ✅ **Tests**: 49/49 passing (100%)
+- ✅ **Coverage**: >78% lines, >80% statements
+- ⚠️ **External Audit**: Pending
+- ⚠️ **Mainnet Deployment**: Not recommended yet
 
 ---
 
-## 🚨 Identificación de Amenazas
+## 🎯 Analysis Objectives
 
-### 1. CRÍTICAS (🔴 Alta Prioridad)
+1. Identify protocol weaknesses and vulnerabilities
+2. Analyze potential attack vectors
+3. Evaluate code maturity for production
+4. Document test coverage and methodology
+5. Provide security improvement roadmap
+
+---
+
+## 🚨 Threat Identification
+
+### 1. CRITICAL (🔴 High Priority)
 
 #### 1.1 Oracle Price Manipulation
-**Vector de Ataque**: Manipulación del precio de Chainlink ETH/USD
-**Severidad**: CRÍTICA
-**Probabilidad**: Baja (Chainlink es resistente)
-**Impacto**: Alto (afecta valoración de depósitos)
+**Attack Vector**: Manipulation of Chainlink ETH/USD price
+**Severity**: CRITICAL
+**Probability**: Low (Chainlink is resistant)
+**Impact**: High (affects deposit valuation)
 
-**Descripción**:
+**Description**:
 ```solidity
-// En _getETHPrice(), dependemos 100% de Chainlink
+// In _getETHPrice(), we depend 100% on Chainlink
 function _getETHPrice() internal view returns (uint256 price) {
     (, int256 answer, , uint256 updatedAt, ) = ethUsdPriceFeed.latestRoundData();
 
-    // Si Chainlink es manipulado o falla, todo el protocolo se ve afectado
+    // If Chainlink is manipulated or fails, the entire protocol is affected
     if (answer <= 0) revert InvalidPrice();
     price = uint256(answer);
 }
 ```
 
-**Mitigaciones Actuales**:
-- ✅ Validación de precio > 0
-- ✅ Validación de staleness (3600 segundos)
-- ✅ Validación de precio mínimo ($1)
+**Current Mitigations**:
+- ✅ Price validation > 0
+- ✅ Staleness validation (3600 seconds)
+- ✅ Minimum price validation ($1)
 
-**Mitigaciones Faltantes**:
-- ❌ **Oracle Redundante**: Usar múltiples fuentes (Chainlink + Uniswap TWAP)
-- ❌ **Circuit Breaker**: Pausar si precio varía >20% en 1 bloque
-- ❌ **Precio Máximo**: Validar que precio no exceda límite razonable
+**Missing Mitigations**:
+- ❌ **Redundant Oracle**: Use multiple sources (Chainlink + Uniswap TWAP)
+- ❌ **Circuit Breaker**: Pause if price varies >20% in 1 block
+- ❌ **Maximum Price**: Validate price doesn't exceed reasonable limit
 
-**Recomendación**:
+**Recommendation**:
 ```solidity
-// Implementar dual oracle con circuit breaker
+// Implement dual oracle with circuit breaker
 function _getETHPrice() internal view returns (uint256 price) {
     uint256 chainlinkPrice = _getChainlinkPrice();
     uint256 uniswapTwapPrice = _getUniswapTWAP();
 
-    // Validar que precios no difieran >10%
+    // Validate prices don't differ >10%
     uint256 priceDiff = chainlinkPrice > uniswapTwapPrice
         ? chainlinkPrice - uniswapTwapPrice
         : uniswapTwapPrice - chainlinkPrice;
 
     if (priceDiff * 100 / chainlinkPrice > 10) revert OracleMismatch();
 
-    // Usar promedio de ambos
+    // Use average of both
     price = (chainlinkPrice + uniswapTwapPrice) / 2;
 }
 ```
@@ -86,47 +86,47 @@ function _getETHPrice() internal view returns (uint256 price) {
 ---
 
 #### 1.2 Flash Loan Attack via Uniswap Price Manipulation
-**Vector de Ataque**: Manipular pool de Uniswap V2 para inflar precio de tokens
-**Severidad**: CRÍTICA
-**Probabilidad**: Media (depende de liquidez del pool)
-**Impacto**: Muy Alto (drene de fondos)
+**Attack Vector**: Manipulate Uniswap V2 pool to inflate token prices
+**Severity**: CRITICAL
+**Probability**: Medium (depends on pool liquidity)
+**Impact**: Very High (fund drain)
 
-**Descripción**:
-Un atacante podría:
-1. Tomar flash loan de 1M DAI
-2. Comprar todo el USDC del pool DAI/USDC en Uniswap
-3. Depositar DAI en KipuBankV3 → swap a precio inflado
-4. Devolver flash loan
-5. Retirar USDC del contrato
+**Description**:
+An attacker could:
+1. Take flash loan of 1M DAI
+2. Buy all USDC from DAI/USDC pool on Uniswap
+3. Deposit DAI in KipuBankV3 → swap at inflated price
+4. Return flash loan
+5. Withdraw USDC from contract
 
-**Escenario de Ataque**:
+**Attack Scenario**:
 ```solidity
-// Atacante deposita 1M DAI cuando pool está manipulado
-// Pool normal: 1M DAI = 1M USDC
-// Pool manipulado: 1M DAI = 2M USDC (precio inflado 2x)
+// Attacker deposits 1M DAI when pool is manipulated
+// Normal pool: 1M DAI = 1M USDC
+// Manipulated pool: 1M DAI = 2M USDC (2x inflated price)
 
 bank.depositToken(DAI, 1_000_000e18);
-// getAmountsOut() retorna 2M USDC debido a manipulación
-// Atacante recibe 2M USDC por 1M DAI
+// getAmountsOut() returns 2M USDC due to manipulation
+// Attacker receives 2M USDC for 1M DAI
 ```
 
-**Mitigaciones Actuales**:
+**Current Mitigations**:
 - ✅ Slippage tolerance (1%)
 - ✅ getAmountsOut() pre-check
 
-**Mitigaciones Faltantes**:
-- ❌ **TWAP Oracle**: Usar precio promedio en lugar de spot
-- ❌ **Liquidez Mínima**: Validar que pool tenga liquidez suficiente
-- ❌ **Rate Limiting**: Limitar depositos grandes en ventana temporal
+**Missing Mitigations**:
+- ❌ **TWAP Oracle**: Use average price instead of spot
+- ❌ **Minimum Liquidity**: Validate pool has sufficient liquidity
+- ❌ **Rate Limiting**: Limit large deposits in time window
 
-**Recomendación**:
+**Recommendation**:
 ```solidity
-// Añadir validación de liquidez del pool
+// Add pool liquidity validation
 function _validateUniswapPool(address tokenIn, address tokenOut) internal view {
     address pair = IUniswapV2Factory(uniswapRouter.factory()).getPair(tokenIn, tokenOut);
 
     (uint112 reserve0, uint112 reserve1,) = IUniswapV2Pair(pair).getReserves();
-    uint256 minLiquidity = 100_000e6; // $100K mínimo
+    uint256 minLiquidity = 100_000e6; // $100K minimum
 
     if (reserve0 < minLiquidity || reserve1 < minLiquidity) {
         revert InsufficientLiquidity();
@@ -136,28 +136,28 @@ function _validateUniswapPool(address tokenIn, address tokenOut) internal view {
 
 ---
 
-#### 1.3 Reentrancy en Tokens ERC777
-**Vector de Ataque**: Tokens ERC777 con hooks pueden reentrar
-**Severidad**: CRÍTICA
-**Probabilidad**: Baja (USDC no es ERC777)
-**Impacto**: Alto (doble gasto)
+#### 1.3 Reentrancy in ERC777 Tokens
+**Attack Vector**: ERC777 tokens with hooks can reenter
+**Severity**: CRITICAL
+**Probability**: Low (USDC is not ERC777)
+**Impact**: High (double spend)
 
-**Descripción**:
-Aunque usamos ReentrancyGuard, tokens ERC777 tienen hooks que se ejecutan ANTES de nuestro modifier.
+**Description**:
+Although we use ReentrancyGuard, ERC777 tokens have hooks that execute BEFORE our modifier.
 
-**Mitigaciones Actuales**:
-- ✅ ReentrancyGuard en todas las funciones
+**Current Mitigations**:
+- ✅ ReentrancyGuard on all functions
 - ✅ CEI pattern (Checks-Effects-Interactions)
 - ✅ SafeERC20
 
-**Mitigaciones Faltantes**:
-- ❌ **Token Whitelist**: Solo permitir tokens conocidos (no ERC777)
+**Missing Mitigations**:
+- ❌ **Token Whitelist**: Only allow known tokens (not ERC777)
 
-**Recomendación**:
+**Recommendation**:
 ```solidity
-// Añadir validación en addToken()
+// Add validation in addToken()
 function addToken(address token) external onlyRole(MANAGER_ROLE) {
-    // Validar que no sea ERC777
+    // Validate it's not ERC777
     try IERC1820Registry(0x1820...).getInterfaceImplementer(
         token,
         keccak256("ERC777Token")
@@ -165,83 +165,83 @@ function addToken(address token) external onlyRole(MANAGER_ROLE) {
         if (implementer != address(0)) revert ERC777NotSupported();
     } catch {}
 
-    // ... resto del código
+    // ... rest of code
 }
 ```
 
 ---
 
-### 2. ALTAS (🟠 Prioridad Media)
+### 2. HIGH (🟠 Medium Priority)
 
-#### 2.1 Front-Running en Swaps
-**Vector de Ataque**: Bots MEV front-run depósitos para extraer valor
-**Severidad**: ALTA
-**Probabilidad**: Alta (muy común en mainnet)
-**Impacto**: Medio (pérdida de valor por slippage)
+#### 2.1 Front-Running in Swaps
+**Attack Vector**: MEV bots front-run deposits to extract value
+**Severity**: HIGH
+**Probability**: High (very common on mainnet)
+**Impact**: Medium (value loss due to slippage)
 
-**Descripción**:
+**Description**:
 ```
-1. User envía tx: depositToken(DAI, 1000)
-2. Bot detecta tx en mempool
-3. Bot front-runs: compra USDC del pool → sube precio
-4. User tx ejecuta → recibe menos USDC por slippage
-5. Bot back-runs: vende USDC → profit
+1. User sends tx: depositToken(DAI, 1000)
+2. Bot detects tx in mempool
+3. Bot front-runs: buys USDC from pool → raises price
+4. User tx executes → receives less USDC due to slippage
+5. Bot back-runs: sells USDC → profit
 ```
 
-**Mitigaciones Actuales**:
+**Current Mitigations**:
 - ✅ Slippage tolerance (1% default)
-- ✅ Deadline en swaps de Uniswap
+- ✅ Deadline in Uniswap swaps
 
-**Mitigaciones Faltantes**:
-- ❌ **Private Mempool**: Integración con Flashbots
-- ❌ **Commit-Reveal**: Depositar en 2 pasos
-- ❌ **Tighter Slippage**: Permitir al usuario configurar slippage por tx
+**Missing Mitigations**:
+- ❌ **Private Mempool**: Integration with Flashbots
+- ❌ **Commit-Reveal**: Deposit in 2 steps
+- ❌ **Tighter Slippage**: Allow user to configure slippage per tx
 
 ---
 
-#### 2.2 Tokens con Transfer Fees
-**Vector de Ataque**: Tokens como STA, PAXG cobran fee en transferencia
-**Severidad**: ALTA
-**Probabilidad**: Media (si se agregan estos tokens)
-**Impacto**: Medio (desbalance contable)
+#### 2.2 Tokens with Transfer Fees
+**Attack Vector**: Tokens like STA, PAXG charge fee on transfer
+**Severity**: HIGH
+**Probability**: Medium (if these tokens are added)
+**Impact**: Medium (accounting imbalance)
 
-**Descripción**:
+**Description**:
 ```solidity
-// User aprueba 1000 STA
+// User approves 1000 STA
 user.approve(bank, 1000e18);
 
-// Bank ejecuta
+// Bank executes
 IERC20(token).safeTransferFrom(user, address(this), 1000e18);
-// Solo recibe 990 STA (1% fee)
+// Only receives 990 STA (1% fee)
 
-// Pero creditamos 1000 USDC al balance del usuario
-balances[user] += 1000e6; // ❌ Debería ser 990e6
+// But we credit 1000 USDC to user balance
+balances[user] += 1000e6; // ❌ Should be 990e6
 ```
 
-**Mitigaciones Actuales**:
-- ❌ Ninguna
+**Current Mitigations**:
+- ❌ None
 
-**Mitigaciones Faltantes**:
-- ✅ **Balance Check**: Medir balance antes/después de transfer
-- ✅ **Blacklist**: No permitir tokens con fees conocidos
+**Missing Mitigations**:
+- ✅ **Balance Check**: Measure balance before/after transfer
+- ✅ **Blacklist**: Don't allow known fee tokens
 
-**Recomendación**:
+**Recommendation**:
 ```solidity
 function depositToken(address token, uint256 amount) external {
-    // ... validaciones
+    // ... validations
 
-    // Medir balance antes
+    // Measure balance before
     uint256 balanceBefore = IERC20(token).balanceOf(address(this));
 
     IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
 
-    // Medir balance después
+    // Measure balance after
     uint256 balanceAfter = IERC20(token).balanceOf(address(this));
     uint256 actualReceived = balanceAfter - balanceBefore;
 
-    // Usar actualReceived en lugar de amount para el swap
+    // Use actualReceived instead of amount for swap
     if (actualReceived < amount) {
-        // Token tiene transfer fee, rechazar
+        // Token has transfer fee, reject
         revert TransferFeeTokenNotSupported();
     }
 }
@@ -250,56 +250,56 @@ function depositToken(address token, uint256 amount) external {
 ---
 
 #### 2.3 USDC Blacklist Risk
-**Vector de Ataque**: USDC puede blacklistear el contrato
-**Severidad**: ALTA
-**Probabilidad**: Muy Baja (solo si hay actividad ilícita)
-**Impacto**: Crítico (fondos bloqueados)
+**Attack Vector**: USDC can blacklist the contract
+**Severity**: HIGH
+**Probability**: Very Low (only if illicit activity)
+**Impact**: Critical (funds locked)
 
-**Descripción**:
-USDC tiene función `blacklist(address)` que impide transfers. Si KipuBankV3 es blacklisteado:
-- ✅ Usuarios pueden depositar (envían USDC al contrato)
-- ❌ Nadie puede retirar (transfer falla)
+**Description**:
+USDC has `blacklist(address)` function that prevents transfers. If KipuBankV3 is blacklisted:
+- ✅ Users can deposit (send USDC to contract)
+- ❌ No one can withdraw (transfer fails)
 
-**Mitigaciones Actuales**:
-- ❌ Ninguna
+**Current Mitigations**:
+- ❌ None
 
-**Mitigaciones Faltantes**:
-- ✅ **Multi-Stablecoin**: Soportar DAI, USDT como alternativas
-- ✅ **Emergency Exit**: Permitir retiro en tokens no-USDC
+**Missing Mitigations**:
+- ✅ **Multi-Stablecoin**: Support DAI, USDT as alternatives
+- ✅ **Emergency Exit**: Allow withdrawal in non-USDC tokens
 
 ---
 
-### 3. MEDIAS (🟡 Prioridad Baja)
+### 3. MEDIUM (🟡 Low Priority)
 
 #### 3.1 Centralization Risk (Admin/Manager)
-**Vector de Ataque**: Admin malicioso puede pausar y drenar fondos
-**Severidad**: MEDIA
-**Probabilidad**: Muy Baja (depende de gobernanza)
-**Impacto**: Alto
+**Attack Vector**: Malicious admin can pause and drain funds
+**Severity**: MEDIUM
+**Probability**: Very Low (depends on governance)
+**Impact**: High
 
-**Mitigaciones Actuales**:
-- ✅ Roles separados (Admin ≠ Manager)
-- ✅ EmergencyWithdraw solo para Admin
+**Current Mitigations**:
+- ✅ Separate roles (Admin ≠ Manager)
+- ✅ EmergencyWithdraw only for Admin
 
-**Mitigaciones Faltantes**:
-- ❌ **Timelock**: Cambios críticos con delay de 24-48h
-- ❌ **Multisig**: Admin debe ser 3-of-5 multisig
-- ❌ **Governance**: DAO puede remover Admin malicioso
+**Missing Mitigations**:
+- ❌ **Timelock**: Critical changes with 24-48h delay
+- ❌ **Multisig**: Admin should be 3-of-5 multisig
+- ❌ **Governance**: DAO can remove malicious Admin
 
 ---
 
-#### 3.2 DoS via Gas Limit en getSupportedTokens()
-**Vector de Ataque**: Agregar 1000+ tokens → getSupportedTokens() falla por gas
-**Severidad**: MEDIA
-**Probabilidad**: Baja
-**Impacto**: Bajo (solo función view)
+#### 3.2 DoS via Gas Limit in getSupportedTokens()
+**Attack Vector**: Add 1000+ tokens → getSupportedTokens() fails due to gas
+**Severity**: MEDIUM
+**Probability**: Low
+**Impact**: Low (view function only)
 
-**Mitigaciones Actuales**:
-- ❌ Ninguna
+**Current Mitigations**:
+- ❌ None
 
-**Recomendación**:
+**Recommendation**:
 ```solidity
-// Añadir paginación
+// Add pagination
 function getSupportedTokens(
     uint256 offset,
     uint256 limit
@@ -318,9 +318,9 @@ function getSupportedTokens(
 
 ---
 
-## 📊 Cobertura de Pruebas
+## 📊 Test Coverage
 
-### Estadísticas de Tests
+### Test Statistics
 
 ```
 Total Tests: 49
@@ -328,72 +328,72 @@ Total Tests: 49
 ❌ Failed: 0 (0%)
 ⏭️ Skipped: 0
 
-Cobertura de Líneas: 78.26%
-Cobertura de Statements: 80.43%
-Cobertura de Branches: ~65%
-Cobertura de Funciones: ~85%
+Line Coverage: 78.26%
+Statement Coverage: 80.43%
+Branch Coverage: ~65%
+Function Coverage: ~85%
 ```
 
-### Desglose por Categoría
+### Breakdown by Category
 
-| Categoría | Tests | Coverage | Estado |
+| Category | Tests | Coverage | Status |
 |-----------|-------|----------|--------|
-| Constructor | 6 | 100% | ✅ Completo |
-| Deposit ETH | 6 | 95% | ✅ Completo |
-| Deposit Token | 7 | 90% | ✅ Completo |
-| Withdraw | 5 | 85% | ✅ Completo |
-| Manager Functions | 8 | 80% | ⚠️ Mejorar |
-| Admin Functions | 5 | 90% | ✅ Completo |
-| View Functions | 7 | 100% | ✅ Completo |
-| Emergency Functions | 2 | 70% | ⚠️ Mejorar |
-| Fuzz Tests | 3 | N/A | ✅ Completo |
+| Constructor | 6 | 100% | ✅ Complete |
+| Deposit ETH | 6 | 95% | ✅ Complete |
+| Deposit Token | 7 | 90% | ✅ Complete |
+| Withdraw | 5 | 85% | ✅ Complete |
+| Manager Functions | 8 | 80% | ⚠️ Improve |
+| Admin Functions | 5 | 90% | ✅ Complete |
+| View Functions | 7 | 100% | ✅ Complete |
+| Emergency Functions | 2 | 70% | ⚠️ Improve |
+| Fuzz Tests | 3 | N/A | ✅ Complete |
 
-### Casos de Prueba Cubiertos
+### Covered Test Cases
 
-#### ✅ Cubiertos
-- Depósitos exitosos (ETH, USDC, DAI)
-- Retiros exitosos
-- Validación de bank cap
-- Validación de límite de retiro
-- Pausa/Despause
-- Roles y permisos
-- Eventos emitidos correctamente
-- Tokens no soportados
-- Cantidades zero
-- Balance insuficiente
+#### ✅ Covered
+- Successful deposits (ETH, USDC, DAI)
+- Successful withdrawals
+- Bank cap validation
+- Withdrawal limit validation
+- Pause/Unpause
+- Roles and permissions
+- Events emitted correctly
+- Unsupported tokens
+- Zero amounts
+- Insufficient balance
 - Reentrancy protection
-- Fuzz testing con múltiples valores
+- Fuzz testing with multiple values
 
-#### ❌ No Cubiertos (Pendientes)
+#### ❌ Not Covered (Pending)
 - [ ] Oracle price staleness > MAX_PRICE_STALENESS
 - [ ] Oracle returns price = 0
 - [ ] Oracle returns price < MIN_VALID_PRICE
-- [ ] Swap con slippage exacto al límite
-- [ ] Swap que falla (reverts)
-- [ ] Multiple pausas consecutivas
-- [ ] Emergency withdraw con balance 0
-- [ ] Token con decimales != 6 y != 18
-- [ ] Depósito que excede uint128 max
-- [ ] Integration test con fork de mainnet
+- [ ] Swap with slippage exactly at limit
+- [ ] Swap that fails (reverts)
+- [ ] Multiple consecutive pauses
+- [ ] Emergency withdraw with balance 0
+- [ ] Token with decimals != 6 and != 18
+- [ ] Deposit exceeding uint128 max
+- [ ] Integration test with mainnet fork
 
 ---
 
-## 🧪 Métodos de Prueba
+## 🧪 Testing Methods
 
 ### 1. Unit Tests (Foundry)
 
 **Framework**: Forge (Foundry)
-**Lenguaje**: Solidity 0.8.30
-**Archivo**: `test/KipuBankV3.t.sol`
+**Language**: Solidity 0.8.30
+**File**: `test/KipuBankV3.t.sol`
 
-**Características**:
-- Tests aislados para cada función
-- Mocks para dependencias externas (Uniswap, Chainlink)
-- Validación de eventos con `vm.expectEmit()`
-- Validación de reverts con `vm.expectRevert()`
-- Tests de roles con `vm.prank()` y `vm.startPrank()`
+**Features**:
+- Isolated tests for each function
+- Mocks for external dependencies (Uniswap, Chainlink)
+- Event validation with `vm.expectEmit()`
+- Revert validation with `vm.expectRevert()`
+- Role tests with `vm.prank()` and `vm.startPrank()`
 
-**Ejemplo**:
+**Example**:
 ```solidity
 function test_DepositETH_Success() public {
     uint256 depositAmount = 1 ether;
@@ -412,18 +412,18 @@ function test_DepositETH_Success() public {
 
 ### 2. Fuzz Testing
 
-**Herramienta**: Foundry Fuzzing
-**Configuración**: 256 runs por test
+**Tool**: Foundry Fuzzing
+**Configuration**: 256 runs per test
 
-**Tests Fuzz**:
-1. `testFuzz_DepositETH(uint256 amount)` - Prueba con 256 cantidades aleatorias
-2. `testFuzz_DepositUSDC(uint256 amount)` - Prueba depósitos USDC aleatorios
-3. `testFuzz_WithdrawUSDC(uint256 deposit, uint256 withdraw)` - Prueba retiros
+**Fuzz Tests**:
+1. `testFuzz_DepositETH(uint256 amount)` - Test with 256 random amounts
+2. `testFuzz_DepositUSDC(uint256 amount)` - Test random USDC deposits
+3. `testFuzz_WithdrawUSDC(uint256 deposit, uint256 withdraw)` - Test withdrawals
 
-**Ejemplo**:
+**Example**:
 ```solidity
 function testFuzz_DepositETH(uint256 amount) public {
-    // Bound amount para evitar valores inválidos
+    // Bound amount to avoid invalid values
     amount = bound(amount, 0.01 ether, 100 ether);
 
     vm.deal(user1, amount);
@@ -436,21 +436,21 @@ function testFuzz_DepositETH(uint256 amount) public {
 
 ### 3. Integration Tests
 
-**Tipo**: Tests con contratos reales (mocks)
-**Cobertura**: Flujos end-to-end
+**Type**: Tests with real contracts (mocks)
+**Coverage**: End-to-end flows
 
-**Tests de Integración**:
-- `test_Integration_MultipleUsersDepositsAndWithdrawals()` - 3 usuarios, múltiples operaciones
-- `test_Integration_TokenSwapFlow()` - Depósito → Swap → Balance → Retiro
+**Integration Tests**:
+- `test_Integration_MultipleUsersDepositsAndWithdrawals()` - 3 users, multiple operations
+- `test_Integration_TokenSwapFlow()` - Deposit → Swap → Balance → Withdraw
 
 ### 4. Gas Optimization Tests
 
-**Herramienta**: `forge test --gas-report`
-**Análisis**:
-- Costo de deployment: 2,214,763 gas
-- Costo por función documentado en GAS_SUMMARY.md
+**Tool**: `forge test --gas-report`
+**Analysis**:
+- Deployment cost: 2,214,763 gas
+- Per-function cost documented in GAS_SUMMARY.md
 
-**Resultados**:
+**Results**:
 ```
 depositETH():         ~156,560 gas
 depositToken(USDC):   ~130,807 gas
@@ -460,166 +460,166 @@ withdraw():            ~61,055 gas
 
 ### 5. Static Analysis
 
-**Herramientas Recomendadas**:
-- ✅ **Slither**: Análisis estático de vulnerabilidades
+**Recommended Tools**:
+- ✅ **Slither**: Static vulnerability analysis
 - ✅ **Mythril**: Symbolic execution
-- ⚠️ **Echidna**: Fuzzing avanzado (pendiente)
-- ⚠️ **Manticore**: Symbolic execution (pendiente)
+- ⚠️ **Echidna**: Advanced fuzzing (pending)
+- ⚠️ **Manticore**: Symbolic execution (pending)
 
-**Comando**:
+**Command**:
 ```bash
 slither src/KipuBankV3.sol --solc-remaps @openzeppelin=lib/openzeppelin-contracts @chainlink=lib/chainlink-brownie-contracts
 ```
 
-### 6. Fork Testing (Pendiente)
+### 6. Fork Testing (Pending)
 
-**Objetivo**: Probar con contratos reales de mainnet
-**Red**: Ethereum Mainnet Fork
+**Objective**: Test with real mainnet contracts
+**Network**: Ethereum Mainnet Fork
 
 ```solidity
-// Ejemplo de fork test
+// Fork test example
 function test_MainnetFork_DepositDAI() public {
-    // Fork mainnet en bloque específico
+    // Fork mainnet at specific block
     vm.createSelectFork("mainnet", 18_000_000);
 
-    // Usar DAI real de mainnet
+    // Use real DAI from mainnet
     IERC20 dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
 
-    // ... test con contratos reales
+    // ... test with real contracts
 }
 ```
 
 ---
 
-## 🛡️ Debilidades del Protocolo
+## 🛡️ Protocol Weaknesses
 
-### Resumen de Debilidades Identificadas
+### Summary of Identified Weaknesses
 
-| # | Debilidad | Severidad | Estado | Prioridad |
+| # | Weakness | Severity | Status | Priority |
 |---|-----------|-----------|--------|-----------|
-| 1 | Oracle Manipulation (Chainlink único) | 🔴 Crítica | ❌ No mitigado | P0 |
-| 2 | Flash Loan Price Manipulation (Uniswap) | 🔴 Crítica | ⚠️ Parcial (slippage) | P0 |
-| 3 | Reentrancy en ERC777 | 🔴 Crítica | ✅ Mitigado (ReentrancyGuard) | P1 |
-| 4 | Front-Running MEV | 🟠 Alta | ⚠️ Parcial (slippage) | P1 |
-| 5 | Tokens con Transfer Fees | 🟠 Alta | ❌ No mitigado | P1 |
-| 6 | USDC Blacklist Risk | 🟠 Alta | ❌ No mitigado | P2 |
-| 7 | Centralización (Admin) | 🟡 Media | ⚠️ Parcial (roles) | P2 |
-| 8 | DoS en getSupportedTokens() | 🟡 Media | ❌ No mitigado | P3 |
-| 9 | USDC Depeg Risk | 🟡 Media | ⚠️ Parcial (pause) | P3 |
-| 10 | Slippage en Swaps Grandes | 🟢 Baja | ✅ Mitigado (tolerance) | P4 |
+| 1 | Oracle Manipulation (single Chainlink) | 🔴 Critical | ❌ Not mitigated | P0 |
+| 2 | Flash Loan Price Manipulation (Uniswap) | 🔴 Critical | ⚠️ Partial (slippage) | P0 |
+| 3 | Reentrancy in ERC777 | 🔴 Critical | ✅ Mitigated (ReentrancyGuard) | P1 |
+| 4 | Front-Running MEV | 🟠 High | ⚠️ Partial (slippage) | P1 |
+| 5 | Tokens with Transfer Fees | 🟠 High | ❌ Not mitigated | P1 |
+| 6 | USDC Blacklist Risk | 🟠 High | ❌ Not mitigated | P2 |
+| 7 | Centralization (Admin) | 🟡 Medium | ⚠️ Partial (roles) | P2 |
+| 8 | DoS in getSupportedTokens() | 🟡 Medium | ❌ Not mitigated | P3 |
+| 9 | USDC Depeg Risk | 🟡 Medium | ⚠️ Partial (pause) | P3 |
+| 10 | Slippage in Large Swaps | 🟢 Low | ✅ Mitigated (tolerance) | P4 |
 
 ---
 
-## 🚧 Pasos Faltantes para Madurez de Producción
+## 🚧 Missing Steps for Production Maturity
 
-### 1. Seguridad (CRÍTICO)
+### 1. Security (CRITICAL)
 
-#### 1.1 Auditorías Externas
-- [ ] **Auditoría Profesional**: Code4rena, OpenZeppelin, Trail of Bits
-- [ ] **Bug Bounty**: Immunefi con $50K+ en premios
-- [ ] **Formal Verification**: Certora para funciones críticas
+#### 1.1 External Audits
+- [ ] **Professional Audit**: Code4rena, OpenZeppelin, Trail of Bits
+- [ ] **Bug Bounty**: Immunefi with $50K+ in rewards
+- [ ] **Formal Verification**: Certora for critical functions
 
-#### 1.2 Mejoras de Código
+#### 1.2 Code Improvements
 - [ ] Dual Oracle (Chainlink + Uniswap TWAP)
-- [ ] Circuit Breaker para precio
-- [ ] Validación de liquidez de pool
-- [ ] Balance check para tokens con fees
-- [ ] Blacklist de tokens ERC777
+- [ ] Circuit Breaker for price
+- [ ] Pool liquidity validation
+- [ ] Balance check for fee tokens
+- [ ] Blacklist ERC777 tokens
 - [ ] Multi-stablecoin support (DAI, USDT)
 
-### 2. Testing (ALTA PRIORIDAD)
+### 2. Testing (HIGH PRIORITY)
 
-- [ ] Cobertura >95% en todas las métricas
-- [ ] Fork tests con mainnet
+- [ ] Coverage >95% in all metrics
+- [ ] Fork tests with mainnet
 - [ ] Chaos testing (random operations)
 - [ ] Load testing (gas limits)
-- [ ] Upgrade testing (si se usa proxy)
+- [ ] Upgrade testing (if using proxy)
 
-### 3. Gobernanza (MEDIA PRIORIDAD)
+### 3. Governance (MEDIUM PRIORITY)
 
-- [ ] Convertir Admin a Multisig 3-of-5
-- [ ] Implementar Timelock (24-48h) para cambios críticos
-- [ ] Documentar proceso de gobernanza
+- [ ] Convert Admin to 3-of-5 Multisig
+- [ ] Implement Timelock (24-48h) for critical changes
+- [ ] Document governance process
 - [ ] Emergency response playbook
 
-### 4. Monitoreo (MEDIA PRIORIDAD)
+### 4. Monitoring (MEDIUM PRIORITY)
 
-- [ ] Integración con Tenderly para alertas
-- [ ] Dashboard de métricas on-chain
-- [ ] Alertas de transacciones sospechosas
-- [ ] Monitoring de oráculos
+- [ ] Integration with Tenderly for alerts
+- [ ] On-chain metrics dashboard
+- [ ] Suspicious transaction alerts
+- [ ] Oracle monitoring
 
-### 5. Documentación (BAJA PRIORIDAD)
+### 5. Documentation (LOW PRIORITY)
 
-- [x] README.md completo
+- [x] Complete README.md
 - [x] Inline comments (NatSpec)
 - [x] SECURITY.md
 - [x] THREAT_ANALYSIS.md
 - [ ] User Guide
-- [ ] Integration Guide para dApps
+- [ ] Integration Guide for dApps
 - [ ] Emergency Procedures
 
-### 6. Infraestructura (BAJA PRIORIDAD)
+### 6. Infrastructure (LOW PRIORITY)
 
 - [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Automated testing en cada commit
+- [ ] Automated testing on each commit
 - [ ] Gas regression tests
-- [ ] Deployment scripts con verificación
-- [ ] Backup de estado on-chain
+- [ ] Deployment scripts with verification
+- [ ] On-chain state backup
 
 ---
 
-## 📈 Roadmap de Seguridad
+## 📈 Security Roadmap
 
-### Fase 1: Pre-Audit (2-4 semanas)
-- [ ] Implementar dual oracle
-- [ ] Añadir validación de liquidez
-- [ ] Aumentar cobertura a >95%
-- [ ] Fork tests con mainnet
-- [ ] Multisig para Admin
+### Phase 1: Pre-Audit (2-4 weeks)
+- [ ] Implement dual oracle
+- [ ] Add liquidity validation
+- [ ] Increase coverage to >95%
+- [ ] Fork tests with mainnet
+- [ ] Multisig for Admin
 
-### Fase 2: Audit (4-6 semanas)
-- [ ] Contratar auditoría profesional
-- [ ] Implementar findings del audit
-- [ ] Re-audit de cambios críticos
+### Phase 2: Audit (4-6 weeks)
+- [ ] Contract professional audit
+- [ ] Implement audit findings
+- [ ] Re-audit critical changes
 
-### Fase 3: Testnet (2-4 semanas)
-- [ ] Deploy en Sepolia
-- [ ] Beta testing con usuarios reales
-- [ ] Monitoreo y ajustes
+### Phase 3: Testnet (2-4 weeks)
+- [ ] Deploy on Sepolia
+- [ ] Beta testing with real users
+- [ ] Monitoring and adjustments
 
-### Fase 4: Mainnet (TBD)
-- [ ] Deploy en mainnet con límites bajos
-- [ ] Aumentar límites gradualmente
-- [ ] Lanzar bug bounty público
+### Phase 4: Mainnet (TBD)
+- [ ] Deploy on mainnet with low limits
+- [ ] Gradually increase limits
+- [ ] Launch public bug bounty
 
 ---
 
-## 🎯 Recomendaciones Finales
+## 🎯 Final Recommendations
 
-### CRÍTICAS (Hacer ANTES de mainnet)
+### CRITICAL (Do BEFORE mainnet)
 1. ✅ **Dual Oracle**: Chainlink + Uniswap TWAP
-2. ✅ **Liquidity Validation**: Validar pools de Uniswap
-3. ✅ **Transfer Fee Protection**: Balance check antes/después
-4. ✅ **Auditoría Externa**: Mínimo 1 audit profesional
-5. ✅ **Multisig Admin**: 3-of-5 para operaciones críticas
+2. ✅ **Liquidity Validation**: Validate Uniswap pools
+3. ✅ **Transfer Fee Protection**: Balance check before/after
+4. ✅ **External Audit**: Minimum 1 professional audit
+5. ✅ **Multisig Admin**: 3-of-5 for critical operations
 
-### IMPORTANTES (Hacer para producción madura)
-6. ⚠️ **Timelock**: 24-48h para cambios de manager
-7. ⚠️ **Multi-Stablecoin**: DAI, USDT además de USDC
-8. ⚠️ **Circuit Breaker**: Auto-pause en precio anómalo
-9. ⚠️ **Fork Tests**: Tests con contratos mainnet reales
-10. ⚠️ **Bug Bounty**: Programa público con Immunefi
+### IMPORTANT (Do for mature production)
+6. ⚠️ **Timelock**: 24-48h for manager changes
+7. ⚠️ **Multi-Stablecoin**: DAI, USDT besides USDC
+8. ⚠️ **Circuit Breaker**: Auto-pause on anomalous price
+9. ⚠️ **Fork Tests**: Tests with real mainnet contracts
+10. ⚠️ **Bug Bounty**: Public program with Immunefi
 
-### OPCIONALES (Nice to have)
-11. 📝 Formal Verification de funciones críticas
-12. 📝 Governance DAO para upgrades
-13. 📝 Insurance Fund para casos extremos
+### OPTIONAL (Nice to have)
+11. 📝 Formal Verification of critical functions
+12. 📝 DAO Governance for upgrades
+13. 📝 Insurance Fund for extreme cases
 14. 📝 Layer 2 deployment (Arbitrum, Optimism)
 
 ---
 
-## 📞 Contacto para Reportar Vulnerabilidades
+## 📞 Contact for Vulnerability Reporting
 
 **Security Email**: security@whitepaper.com
 **Developer**: Hernan Herrera (hernanherrera@whitepaper.com)
@@ -634,7 +634,7 @@ function test_MainnetFork_DepositDAI() public {
 
 ---
 
-## 📚 Referencias
+## 📚 References
 
 1. [Consensys Smart Contract Best Practices](https://consensys.github.io/smart-contract-best-practices/)
 2. [Trail of Bits Building Secure Contracts](https://github.com/crytic/building-secure-contracts)
@@ -644,6 +644,6 @@ function test_MainnetFork_DepositDAI() public {
 
 ---
 
-**Última Actualización**: 2025-11-09
-**Próxima Revisión**: Post-Audit Externo
-**Versión**: 1.0.0
+**Last Update**: 2025-11-09
+**Next Review**: Post-External Audit
+**Version**: 1.0.0
