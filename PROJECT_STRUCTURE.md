@@ -1,5 +1,9 @@
 # KipuBankV3 - Estructura del Proyecto
 
+**Autor**: Hernan Herrera
+**Organización**: White Paper
+**Fecha**: 2025-11-09
+
 ## 📁 Estructura Completa de Archivos
 
 ```

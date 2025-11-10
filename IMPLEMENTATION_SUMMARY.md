@@ -442,6 +442,11 @@ function depositToken(address token, uint256 amount) external { ... }
 
 ## 📞 Información del Proyecto
 
+- **Autor**: Hernan Herrera
+- **Organización**: White Paper
+- **Email**: hernanherrera@whitepaper.com
+- **Soporte**: support@whitepaper.com
+- **Security**: security@whitepaper.com
 - **Repositorio**: https://github.com/your-username/KipuBankV3
 - **Documentación**: Ver README.md
 - **Tests**: `forge test`

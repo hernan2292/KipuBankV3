@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {KipuBankV3} from "../src/KipuBankV3.sol";
 import {IKipuBankV3} from "../src/interfaces/IKipuBankV3.sol";
 import {MockERC20} from "../src/mocks/MockERC20.sol";
@@ -72,6 +72,8 @@ contract KipuBankV3Test is Test {
         weth = new MockERC20("Wrapped Ether", "WETH", 18);
 
         // Deploy mock price feed
+        // Casting to int256 is safe because ETH_PRICE is a constant that fits in int256
+        // forge-lint: disable-next-line(unsafe-typecast)
         ethPriceFeed = new MockV3Aggregator(8, int256(ETH_PRICE));
 
         // Deploy mock Uniswap router
@@ -171,7 +173,9 @@ contract KipuBankV3Test is Test {
 
     function test_DepositETH_Success() public {
         uint256 depositAmount = 1 ether;
-        uint256 expectedUSDC = (depositAmount * uniswapRouter.exchangeRate()) / 10000;
+        // ETH (18 decimals) -> USDC (6 decimals) with 1:1 exchange rate
+        // 1e18 * 10000 / 10000 / 1e12 = 1e6
+        uint256 expectedUSDC = (depositAmount * uniswapRouter.exchangeRate()) / 10000 / 1e12;
 
         vm.startPrank(user1);
 
@@ -225,11 +229,15 @@ contract KipuBankV3Test is Test {
     function test_DepositETH_RevertsOnBankCapExceeded() public {
         // Set low bank cap
         vm.prank(manager);
-        bank.setBankCap(1000e6); // $1000
+        bank.setBankCap(1000e6); // $1000 USDC
+
+        // Give user enough ETH
+        vm.deal(user1, 10000 ether);
 
         vm.startPrank(user1);
         vm.expectRevert(IKipuBankV3.BankCapExceeded.selector);
-        bank.depositETH{value: 10 ether}(); // Would exceed cap
+        // With decimal conversion: 10000 ETH -> 10000e6 USDC (exceeds 1000e6 cap)
+        bank.depositETH{value: 10000 ether}(); // Would exceed cap
         vm.stopPrank();
     }
 
@@ -256,8 +264,10 @@ contract KipuBankV3Test is Test {
         vm.prank(manager);
         bank.addToken(address(dai));
 
-        uint256 depositAmount = 1000e18; // 1000 DAI
-        uint256 expectedUSDC = (depositAmount * uniswapRouter.exchangeRate()) / 10000;
+        uint256 depositAmount = 1000e18; // 1000 DAI (18 decimals)
+        // DAI (18 decimals) -> USDC (6 decimals) with 1:1 exchange rate
+        // 1000e18 * 10000 / 10000 / 1e12 = 1000e6
+        uint256 expectedUSDC = (depositAmount * uniswapRouter.exchangeRate()) / 10000 / 1e12;
 
         vm.startPrank(user1);
         dai.approve(address(bank), depositAmount);
@@ -332,8 +342,12 @@ contract KipuBankV3Test is Test {
     }
 
     function test_Withdraw_RevertsOnWithdrawalLimitExceeded() public {
-        // Deposit large amount
-        uint256 depositAmount = 100_000e6;
+        // Deposit large amount (more than withdrawal limit)
+        uint256 depositAmount = 200_000e6; // $200K (more than $100K limit)
+
+        // Mint enough USDC for user1
+        usdc.mint(user1, depositAmount);
+
         vm.startPrank(user1);
         usdc.approve(address(bank), depositAmount);
         bank.depositToken(address(usdc), depositAmount);

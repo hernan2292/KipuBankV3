@@ -522,9 +522,10 @@ echo "Gas price acceptable, deploying..."
 Si encuentras problemas:
 
 1. **Documentación**: Revisa [README.md](README.md)
-2. **Issues**: https://github.com/your-username/KipuBankV3/issues
-3. **Discord**: https://discord.gg/kipubank
-4. **Email**: support@kipubank.io
+2. **Support Email**: support@whitepaper.com
+3. **Security Email**: security@whitepaper.com
+4. **Developer**: Hernan Herrera (hernanherrera@whitepaper.com)
+5. **Organization**: White Paper
 
 ---
 

@@ -4,120 +4,120 @@
 ![Foundry](https://img.shields.io/badge/Foundry-latest-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-## 📋 Tabla de Contenidos
+## 📋 Table of Contents
 
-- [Resumen Ejecutivo](#resumen-ejecutivo)
-- [Características Principales](#características-principales)
-- [Mejoras sobre KipuBankV2](#mejoras-sobre-kipubankv2)
-- [Arquitectura del Sistema](#arquitectura-del-sistema)
-- [Instalación y Configuración](#instalación-y-configuración)
-- [Uso y Despliegue](#uso-y-despliegue)
-- [Interacción con el Contrato](#interacción-con-el-contrato)
-- [Testing y Cobertura](#testing-y-cobertura)
-- [Análisis de Amenazas](#análisis-de-amenazas)
-- [Decisiones de Diseño](#decisiones-de-diseño)
-- [Auditoría y Seguridad](#auditoría-y-seguridad)
+- [Executive Summary](#executive-summary)
+- [Main Features](#main-features)
+- [Improvements over KipuBankV2](#improvements-over-kipubankv2)
+- [System Architecture](#system-architecture)
+- [Installation and Setup](#installation-and-setup)
+- [Usage and Deployment](#usage-and-deployment)
+- [Contract Interaction](#contract-interaction)
+- [Testing and Coverage](#testing-and-coverage)
+- [Threat Analysis](#threat-analysis)
+- [Design Decisions](#design-decisions)
+- [Audit and Security](#audit-and-security)
 - [Roadmap](#roadmap)
 
 ---
 
-## 🎯 Resumen Ejecutivo
+## 🎯 Executive Summary
 
-**KipuBankV3** es un sistema bancario DeFi avanzado que permite a los usuarios depositar **cualquier token soportado por Uniswap V2**, automáticamente intercambiarlo a **USDC**, y gestionar sus balances de forma segura. El sistema respeta un límite máximo del banco (bank cap) y preserva toda la funcionalidad de KipuBankV2, mientras añade capacidades de composabilidad con protocolos DeFi.
+**KipuBankV3** is an advanced DeFi banking system that allows users to deposit **any token supported by Uniswap V2**, automatically swap it to **USDC**, and securely manage their balances. The system respects a maximum bank limit (bank cap) and preserves all KipuBankV2 functionality, while adding composability capabilities with DeFi protocols.
 
-### Casos de Uso Principales
+### Main Use Cases
 
-1. **Depósito Unificado**: Los usuarios pueden depositar ETH, USDC, o cualquier token ERC20 con liquidez en Uniswap V2
-2. **Conversión Automática**: Todos los tokens se convierten automáticamente a USDC, simplificando la gestión
-3. **Gestión de Riesgo**: Bank cap y límites de retiro protegen el protocolo
-4. **Gobernanza**: Sistema de roles (Admin/Manager) para gestión descentralizada
+1. **Unified Deposit**: Users can deposit ETH, USDC, or any ERC20 token with liquidity on Uniswap V2
+2. **Automatic Conversion**: All tokens are automatically converted to USDC, simplifying management
+3. **Risk Management**: Bank cap and withdrawal limits protect the protocol
+4. **Governance**: Role system (Admin/Manager) for decentralized management
 
 ---
 
-## ✨ Características Principales
+## ✨ Main Features
 
-### 1. 🔄 Depósitos Multi-Token con Swap Automático
+### 1. 🔄 Multi-Token Deposits with Automatic Swap
 
 ```solidity
-// Depositar ETH (se convierte a USDC automáticamente)
+// Deposit ETH (automatically converted to USDC)
 function depositETH() external payable
 
-// Depositar cualquier token ERC20 soportado
+// Deposit any supported ERC20 token
 function depositToken(address token, uint256 amount) external
 ```
 
-**Proceso de Depósito:**
-1. Usuario deposita Token X
-2. Si Token X ≠ USDC → Swap automático via Uniswap V2
-3. USDC resultante se acredita al balance del usuario
-4. Se valida bank cap post-swap
+**Deposit Process:**
+1. User deposits Token X
+2. If Token X ≠ USDC → Automatic swap via Uniswap V2
+3. Resulting USDC is credited to user's balance
+4. Bank cap validated post-swap
 
-### 2. 🛡️ Protecciones de Seguridad
+### 2. 🛡️ Security Protections
 
-- **ReentrancyGuard**: Prevención de ataques de reentrada
-- **Pausable**: Mecanismo de pausa de emergencia
-- **AccessControl**: Roles granulares (Admin, Manager)
-- **Slippage Protection**: Tolerancia configurable para swaps
-- **Price Staleness Check**: Validación de frescura de oráculos Chainlink
+- **ReentrancyGuard**: Prevention of reentrancy attacks
+- **Pausable**: Emergency pause mechanism
+- **AccessControl**: Granular roles (Admin, Manager)
+- **Slippage Protection**: Configurable tolerance for swaps
+- **Price Staleness Check**: Chainlink oracle freshness validation
 
-### 3. 📊 Integración con Protocolos Externos
+### 3. 📊 External Protocol Integration
 
-- **Uniswap V2**: Swaps automáticos de tokens
-- **Chainlink**: Oráculos de precios para ETH/USD
-- **OpenZeppelin**: Librerías battle-tested de seguridad
+- **Uniswap V2**: Automatic token swaps
+- **Chainlink**: Price oracles for ETH/USD
+- **OpenZeppelin**: Battle-tested security libraries
 
-### 4. 💰 Gestión de Capacidad
+### 4. 💰 Capacity Management
 
 ```solidity
-uint256 public bankCapUSD;           // Capacidad máxima en USD
-uint256 public totalBankValueUSD;    // Valor total almacenado
-uint256 public withdrawalLimitUSD;   // Límite de retiro por transacción
+uint256 public bankCapUSD;           // Maximum capacity in USD
+uint256 public totalBankValueUSD;    // Total stored value
+uint256 public withdrawalLimitUSD;   // Withdrawal limit per transaction
 ```
 
-### 5. 🎛️ Configuración Flexible
+### 5. 🎛️ Flexible Configuration
 
-- **Bank Cap**: Ajustable por Manager
-- **Withdrawal Limit**: Límite por transacción configurable
-- **Slippage Tolerance**: Tolerancia de slippage personalizable
-- **Token Status**: Tokens pueden pausarse individualmente
-
----
-
-## 🚀 Mejoras sobre KipuBankV2
-
-| Característica | KipuBankV2 | KipuBankV3 |
-|----------------|------------|------------|
-| Tokens Soportados | ETH + USDC + ERC20 limitados | Cualquier token con par USDC en Uniswap V2 |
-| Conversión de Tokens | Manual / No soportada | Automática via Uniswap V2 |
-| Balance Interno | Multi-token | Unificado en USDC |
-| Protección de Slippage | ❌ | ✅ Configurable |
-| Pricing | Chainlink solo para ETH | Chainlink + Uniswap V2 |
-| Composabilidad DeFi | Limitada | Alta (integración Uniswap) |
-| Gas Efficiency | Buena | Optimizada (state caching) |
-
-### Ventajas Clave de V3
-
-1. **Simplicidad para el Usuario**: Un solo balance en USDC, sin necesidad de gestionar múltiples tokens
-2. **Mayor Liquidez**: Acceso a cualquier token con liquidez en Uniswap
-3. **Menor Complejidad**: Frontend solo necesita mostrar balance en USDC
-4. **Mejor UX**: Usuarios no necesitan preocuparse por qué token depositar
+- **Bank Cap**: Adjustable by Manager
+- **Withdrawal Limit**: Configurable per-transaction limit
+- **Slippage Tolerance**: Customizable slippage tolerance
+- **Token Status**: Tokens can be paused individually
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 🚀 Improvements over KipuBankV2
 
-### Diagrama de Flujo - Depósito con Swap
+| Feature | KipuBankV2 | KipuBankV3 |
+|---------|------------|------------|
+| Supported Tokens | ETH + USDC + limited ERC20 | Any token with USDC pair on Uniswap V2 |
+| Token Conversion | Manual / Not supported | Automatic via Uniswap V2 |
+| Internal Balance | Multi-token | Unified in USDC |
+| Slippage Protection | ❌ | ✅ Configurable |
+| Pricing | Chainlink for ETH only | Chainlink + Uniswap V2 |
+| DeFi Composability | Limited | High (Uniswap integration) |
+| Gas Efficiency | Good | Optimized (state caching) |
+
+### Key V3 Advantages
+
+1. **User Simplicity**: Single USDC balance, no need to manage multiple tokens
+2. **Greater Liquidity**: Access to any token with liquidity on Uniswap
+3. **Lower Complexity**: Frontend only needs to display USDC balance
+4. **Better UX**: Users don't need to worry about which token to deposit
+
+---
+
+## 🏗️ System Architecture
+
+### Deposit with Swap Flow Diagram
 
 ```
 ┌─────────────┐
-│   Usuario   │
+│    User     │
 └──────┬──────┘
        │ 1. depositToken(DAI, 1000)
        ▼
 ┌─────────────────────┐
 │   KipuBankV3        │
 │  ┌──────────────┐   │
-│  │ Validaciones │   │ 2. Validar token soportado, activo, etc.
+│  │ Validations  │   │ 2. Validate supported token, active, etc.
 │  └──────┬───────┘   │
 │         │           │
 │  ┌──────▼───────┐   │
@@ -150,76 +150,76 @@ uint256 public withdrawalLimitUSD;   // Límite de retiro por transacción
 └─────────────────────┘
 ```
 
-### Componentes Principales
+### Main Components
 
-#### 1. **KipuBankV3.sol** (Contrato Principal)
-- Gestión de depósitos y retiros
-- Integración con Uniswap V2
-- Control de acceso y pausabilidad
-- Gestión de bank cap
+#### 1. **KipuBankV3.sol** (Main Contract)
+- Deposit and withdrawal management
+- Uniswap V2 integration
+- Access control and pausability
+- Bank cap management
 
 #### 2. **IKipuBankV3.sol** (Interface)
-- Define todos los métodos públicos
-- Eventos y errores custom
-- Estructuras de datos
+- Defines all public methods
+- Custom events and errors
+- Data structures
 
-#### 3. **IUniswapV2Router02.sol** (Interface Externa)
-- Funciones de swap de Uniswap V2
-- Quote functions para estimaciones
+#### 3. **IUniswapV2Router02.sol** (External Interface)
+- Uniswap V2 swap functions
+- Quote functions for estimations
 
 #### 4. **Mocks** (Testing)
-- MockERC20: Tokens de prueba
-- MockV3Aggregator: Oracle de precios mock
-- MockUniswapV2Router: Router mock para tests
+- MockERC20: Test tokens
+- MockV3Aggregator: Mock price oracle
+- MockUniswapV2Router: Mock router for tests
 
 ---
 
-## 📦 Instalación y Configuración
+## 📦 Installation and Setup
 
-### Prerequisitos
+### Prerequisites
 
 ```bash
-# Instalar Foundry
+# Install Foundry
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
-# Verificar instalación
+# Verify installation
 forge --version
 ```
 
-### Instalación
+### Installation
 
 ```bash
-# Clonar repositorio
+# Clone repository
 git clone https://github.com/your-username/KipuBankV3.git
 cd KipuBankV3
 
-# Instalar dependencias
+# Install dependencies
 forge install OpenZeppelin/openzeppelin-contracts --no-commit
 forge install smartcontractkit/chainlink --no-commit
 
-# Compilar contratos
+# Compile contracts
 forge build
 ```
 
-### Configuración de Variables de Entorno
+### Environment Variable Setup
 
 ```bash
-# Copiar archivo de ejemplo
+# Copy example file
 cp .env.example .env
 
-# Editar .env con tus valores
+# Edit .env with your values
 nano .env
 ```
 
-Ejemplo de `.env`:
+Example `.env`:
 
 ```bash
 SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY
 PRIVATE_KEY=0xYOUR_PRIVATE_KEY
 ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
 
-# Direcciones de contratos en Sepolia
+# Contract addresses on Sepolia
 UNISWAP_V2_ROUTER_SEPOLIA=0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008
 USDC_SEPOLIA=0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
 ETH_USD_PRICE_FEED_SEPOLIA=0x694AA1769357215DE4FAC081bf1f309aDC325306
@@ -227,42 +227,42 @@ ETH_USD_PRICE_FEED_SEPOLIA=0x694AA1769357215DE4FAC081bf1f309aDC325306
 
 ---
 
-## 🚢 Uso y Despliegue
+## 🚢 Usage and Deployment
 
-### Ejecutar Tests
+### Run Tests
 
 ```bash
-# Ejecutar todos los tests
+# Run all tests
 forge test
 
-# Ejecutar tests con verbosidad
+# Run tests with verbosity
 forge test -vvv
 
-# Ejecutar tests específicos
+# Run specific tests
 forge test --match-test test_DepositETH_Success
 
-# Ejecutar tests con gas reporting
+# Run tests with gas reporting
 forge test --gas-report
 ```
 
-### Cobertura de Tests
+### Test Coverage
 
 ```bash
-# Generar reporte de cobertura
+# Generate coverage report
 forge coverage
 
-# Generar reporte detallado con lcov
+# Generate detailed report with lcov
 forge coverage --report lcov
 
-# Visualizar cobertura en HTML (requiere genhtml)
+# Visualize coverage in HTML (requires genhtml)
 genhtml lcov.info --output-directory coverage
 open coverage/index.html
 ```
 
-### Desplegar en Sepolia
+### Deploy on Sepolia
 
 ```bash
-# Desplegar contrato
+# Deploy contract
 forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --rpc-url $SEPOLIA_RPC_URL \
   --private-key $PRIVATE_KEY \
@@ -270,13 +270,13 @@ forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --verify \
   --etherscan-api-key $ETHERSCAN_API_KEY
 
-# El script mostrará la dirección del contrato desplegado
+# The script will display the deployed contract address
 ```
 
-### Desplegar en Mainnet
+### Deploy on Mainnet
 
 ```bash
-# ⚠️ ADVERTENCIA: Desplegar en mainnet requiere ETH real
+# ⚠️ WARNING: Deploying on mainnet requires real ETH
 
 forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --rpc-url $MAINNET_RPC_URL \
@@ -286,7 +286,7 @@ forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --etherscan-api-key $ETHERSCAN_API_KEY
 ```
 
-### Verificar Contrato Manualmente
+### Manually Verify Contract
 
 ```bash
 forge verify-contract \
@@ -301,11 +301,11 @@ forge verify-contract \
 
 ---
 
-## 🔌 Interacción con el Contrato
+## 🔌 Contract Interaction
 
-### Para Usuarios (Depositar y Retirar)
+### For Users (Deposit and Withdraw)
 
-#### 1. Depositar ETH
+#### 1. Deposit ETH
 
 ```javascript
 // Web3.js
@@ -319,30 +319,30 @@ await contract.methods.depositETH().send({
 ```
 
 ```solidity
-// Solidity (desde otro contrato)
+// Solidity (from another contract)
 IKipuBankV3(bankAddress).depositETH{value: 1 ether}();
 ```
 
-#### 2. Depositar Tokens ERC20
+#### 2. Deposit ERC20 Tokens
 
 ```javascript
-// Primero aprobar el token
+// First approve the token
 const tokenContract = new web3.eth.Contract(ERC20_ABI, TOKEN_ADDRESS);
 await tokenContract.methods.approve(
   CONTRACT_ADDRESS,
   amount
 ).send({ from: userAddress });
 
-// Luego depositar
+// Then deposit
 await contract.methods.depositToken(TOKEN_ADDRESS, amount).send({
   from: userAddress
 });
 ```
 
-#### 3. Retirar USDC
+#### 3. Withdraw USDC
 
 ```javascript
-// Retirar 100 USDC (6 decimals)
+// Withdraw 100 USDC (6 decimals)
 const amount = '100000000'; // 100 * 10^6
 
 await contract.methods.withdraw(amount).send({
@@ -350,60 +350,60 @@ await contract.methods.withdraw(amount).send({
 });
 ```
 
-#### 4. Consultar Balance
+#### 4. Check Balance
 
 ```javascript
-// Obtener balance en USDC
+// Get USDC balance
 const balance = await contract.methods.getBalance(userAddress).call();
 console.log(`Balance: ${balance / 1e6} USDC`);
 
-// Obtener total del banco
+// Get total bank value
 const totalValue = await contract.methods.getTotalBankValueUSD().call();
 console.log(`Total Bank Value: $${totalValue / 1e6}`);
 ```
 
-### Para Managers (Configuración)
+### For Managers (Configuration)
 
-#### 1. Agregar Nuevo Token
+#### 1. Add New Token
 
 ```javascript
-// Agregar DAI como token soportado
+// Add DAI as supported token
 await contract.methods.addToken(DAI_ADDRESS).send({
   from: managerAddress
 });
 ```
 
-#### 2. Pausar Token
+#### 2. Pause Token
 
 ```javascript
-// Pausar un token (1 = Active, 2 = Paused)
+// Pause a token (1 = Active, 2 = Paused)
 await contract.methods.setTokenStatus(TOKEN_ADDRESS, 2).send({
   from: managerAddress
 });
 ```
 
-#### 3. Actualizar Bank Cap
+#### 3. Update Bank Cap
 
 ```javascript
-// Actualizar bank cap a $2M
+// Update bank cap to $2M
 const newCap = '2000000000000'; // 2M * 10^6
 await contract.methods.setBankCap(newCap).send({
   from: managerAddress
 });
 ```
 
-#### 4. Actualizar Slippage
+#### 4. Update Slippage
 
 ```javascript
-// Actualizar slippage a 2% (200 basis points)
+// Update slippage to 2% (200 basis points)
 await contract.methods.setSlippageTolerance(200).send({
   from: managerAddress
 });
 ```
 
-### Para Admins (Emergencias)
+### For Admins (Emergencies)
 
-#### 1. Pausar el Contrato
+#### 1. Pause Contract
 
 ```javascript
 await contract.methods.pause().send({
@@ -411,7 +411,7 @@ await contract.methods.pause().send({
 });
 ```
 
-#### 2. Reanudar el Contrato
+#### 2. Unpause Contract
 
 ```javascript
 await contract.methods.unpause().send({
@@ -419,10 +419,10 @@ await contract.methods.unpause().send({
 });
 ```
 
-#### 3. Retiro de Emergencia
+#### 3. Emergency Withdrawal
 
 ```javascript
-// Retirar 1000 USDC de emergencia
+// Withdraw 1000 USDC in emergency
 await contract.methods.emergencyWithdraw(
   USDC_ADDRESS,
   '1000000000', // 1000 * 10^6
@@ -432,87 +432,87 @@ await contract.methods.emergencyWithdraw(
 
 ---
 
-## 🧪 Testing y Cobertura
+## 🧪 Testing and Coverage
 
-### Suite de Tests
+### Test Suite
 
-El proyecto incluye **65+ tests** que cubren:
+The project includes **65+ tests** covering:
 
 1. **Constructor Tests** (6 tests)
-   - Inicialización correcta
-   - Validación de parámetros
-   - Asignación de roles
+   - Correct initialization
+   - Parameter validation
+   - Role assignment
 
 2. **Deposit ETH Tests** (6 tests)
-   - Depósitos exitosos
-   - Validaciones de monto
+   - Successful deposits
+   - Amount validations
    - Bank cap exceeded
-   - Estado pausado
+   - Paused state
 
 3. **Deposit Token Tests** (7 tests)
-   - Depósitos USDC directos
-   - Depósitos con swap (DAI → USDC)
-   - Tokens no soportados
-   - Validaciones
+   - Direct USDC deposits
+   - Deposits with swap (DAI → USDC)
+   - Unsupported tokens
+   - Validations
 
 4. **Withdrawal Tests** (4 tests)
-   - Retiros exitosos
-   - Balance insuficiente
-   - Límite de retiro excedido
+   - Successful withdrawals
+   - Insufficient balance
+   - Withdrawal limit exceeded
 
 5. **Manager Functions Tests** (9 tests)
-   - Agregar tokens
-   - Cambiar estado de tokens
-   - Actualizar bank cap
-   - Actualizar límites
-   - Actualizar slippage
+   - Add tokens
+   - Change token status
+   - Update bank cap
+   - Update limits
+   - Update slippage
 
 6. **Admin Functions Tests** (4 tests)
-   - Pausar/despausar
-   - Retiros de emergencia
-   - Control de acceso
+   - Pause/unpause
+   - Emergency withdrawals
+   - Access control
 
 7. **View Functions Tests** (6 tests)
-   - Consulta de balances
-   - Información de tokens
-   - Precios de oráculos
-   - Estimaciones de swap
+   - Query balances
+   - Token information
+   - Oracle prices
+   - Swap estimations
 
 8. **Integration Tests** (2 tests)
-   - Flujos completos multi-usuario
-   - Swap y retiro end-to-end
+   - Complete multi-user flows
+   - Swap and withdrawal end-to-end
 
 9. **Fuzz Tests** (3 tests)
-   - Depósitos con montos aleatorios
-   - Retiros con montos aleatorios
+   - Deposits with random amounts
+   - Withdrawals with random amounts
 
 10. **Receive/Fallback Tests** (2 tests)
-    - Rechazo de ETH directo
-    - Rechazo de llamadas inválidas
+    - Reject direct ETH
+    - Reject invalid calls
 
-### Ejecutar Tests Específicos
+### Run Specific Tests
 
 ```bash
-# Tests de depósitos ETH
+# ETH deposit tests
 forge test --match-contract KipuBankV3Test --match-test test_DepositETH
 
-# Tests de manager
+# Manager tests
 forge test --match-test test_AddToken
 
-# Tests con fuzz
+# Fuzz tests
 forge test --match-test testFuzz
 ```
 
-### Objetivos de Cobertura
+### Coverage Targets
 
-- **Cobertura Actual**: >50% (cumple requisito del examen)
-- **Objetivo Final**: >80%
+- **Current Coverage**: >50% (meets exam requirement)
+- **Final Target**: >80%
 
 ```bash
-# Verificar cobertura actual
+# Check current coverage
 forge coverage --report summary
 
-# Ejemplo de output:
+# Example output:
 | File                    | % Lines        | % Statements   | % Branches   | % Funcs      |
 |-------------------------|----------------|----------------|--------------|--------------|
 | src/KipuBankV3.sol      | 78.26%         | 80.43%         | 65.00%       | 85.71%       |
@@ -521,232 +521,232 @@ forge coverage --report summary
 
 ---
 
-## 🛡️ Análisis de Amenazas
+## 🛡️ Threat Analysis
 
-### 1. Vulnerabilidades Identificadas
+### 1. Identified Vulnerabilities
 
-#### 🔴 CRÍTICAS
+#### 🔴 CRITICAL
 
 ##### 1.1 Oracle Manipulation Attack
-**Descripción**: Los precios de Chainlink podrían ser manipulados en condiciones extremas de mercado.
+**Description**: Chainlink prices could be manipulated under extreme market conditions.
 
-**Impacto**: Los usuarios podrían recibir menos USDC de lo esperado en swaps.
+**Impact**: Users could receive less USDC than expected in swaps.
 
-**Mitigación Implementada**:
-- ✅ Validación de staleness (< 1 hora)
-- ✅ Validación de roundId
-- ✅ Precio mínimo válido ($1)
+**Implemented Mitigation**:
+- ✅ Staleness validation (< 1 hour)
+- ✅ RoundId validation
+- ✅ Minimum valid price ($1)
 
-**Mitigación Pendiente**:
-- ⚠️ Implementar múltiples oráculos (Chainlink + Uniswap TWAP)
-- ⚠️ Circuit breaker para cambios de precio >10% en una hora
+**Pending Mitigation**:
+- ⚠️ Implement multiple oracles (Chainlink + Uniswap TWAP)
+- ⚠️ Circuit breaker for price changes >10% in one hour
 
 ##### 1.2 Slippage Attack
-**Descripción**: Sandwich attacks o front-running podrían explotar swaps grandes.
+**Description**: Sandwich attacks or front-running could exploit large swaps.
 
-**Impacto**: Pérdida de valor en swaps (MEV attack).
+**Impact**: Loss of value in swaps (MEV attack).
 
-**Mitigación Implementada**:
-- ✅ Slippage tolerance configurable
-- ✅ Deadline de 5 minutos en swaps
-- ✅ Validación de amountOut mínimo
+**Implemented Mitigation**:
+- ✅ Configurable slippage tolerance
+- ✅ 5-minute deadline on swaps
+- ✅ Minimum amountOut validation
 
-**Mitigación Pendiente**:
-- ⚠️ Integrar Flashbots/MEV protection
-- ⚠️ Límite máximo por swap (evitar grandes transacciones)
+**Pending Mitigation**:
+- ⚠️ Integrate Flashbots/MEV protection
+- ⚠️ Maximum limit per swap (avoid large transactions)
 
 ##### 1.3 Reentrancy via External Calls
-**Descripción**: Llamadas a Uniswap Router podrían reingresar al contrato.
+**Description**: Calls to Uniswap Router could reenter the contract.
 
-**Impacto**: Drenaje de fondos, doble gasto.
+**Impact**: Fund drainage, double spending.
 
-**Mitigación Implementada**:
-- ✅ ReentrancyGuard en todas las funciones public/external
+**Implemented Mitigation**:
+- ✅ ReentrancyGuard on all public/external functions
 - ✅ CEI (Checks-Effects-Interactions) pattern
-- ✅ Estado actualizado antes de llamadas externas
+- ✅ State updated before external calls
 
-**Mitigación Pendiente**:
-- ✅ **COMPLETAMENTE MITIGADO**
+**Pending Mitigation**:
+- ✅ **FULLY MITIGATED**
 
-#### 🟡 ALTAS
+#### 🟡 HIGH
 
 ##### 2.1 Token Approval Front-running
-**Descripción**: Usuarios podrían ver aprobaciones y front-run depósitos.
+**Description**: Users could see approvals and front-run deposits.
 
-**Impacto**: Pérdida temporal de tokens (requiere fallo del usuario).
+**Impact**: Temporary token loss (requires user failure).
 
-**Mitigación Implementada**:
-- ✅ SafeERC20 con forceApprove
-- ✅ Aprobación justo antes del swap
+**Implemented Mitigation**:
+- ✅ SafeERC20 with forceApprove
+- ✅ Approval just before swap
 
-**Mitigación Pendiente**:
-- ⚠️ Implementar permit() (EIP-2612) para aprobaciones sin gas
+**Pending Mitigation**:
+- ⚠️ Implement permit() (EIP-2612) for gasless approvals
 
 ##### 2.2 Admin Key Compromise
-**Descripción**: Si la clave privada del admin se compromete, el atacante tiene control total.
+**Description**: If admin private key is compromised, attacker has full control.
 
-**Impacto**: Robo de fondos via emergencyWithdraw, pausar el contrato.
+**Impact**: Fund theft via emergencyWithdraw, pause contract.
 
-**Mitigación Implementada**:
-- ✅ Roles separados (Admin vs Manager)
-- ✅ emergencyWithdraw solo para Admin
+**Implemented Mitigation**:
+- ✅ Separate roles (Admin vs Manager)
+- ✅ emergencyWithdraw only for Admin
 
-**Mitigación Pendiente**:
-- ⚠️ Implementar Multisig (Gnosis Safe)
-- ⚠️ Timelock para operaciones críticas
+**Pending Mitigation**:
+- ⚠️ Implement Multisig (Gnosis Safe)
+- ⚠️ Timelock for critical operations
 
 ##### 2.3 Bank Cap Bypass
-**Descripción**: Condiciones de carrera podrían permitir múltiples depósitos que exceden el cap.
+**Description**: Race conditions could allow multiple deposits exceeding cap.
 
-**Impacto**: Bank cap excedido, riesgo sistémico.
+**Impact**: Bank cap exceeded, systemic risk.
 
-**Mitigación Implementada**:
-- ✅ Validación atómica en la misma transacción
-- ✅ Estado actualizado antes de swap
+**Implemented Mitigation**:
+- ✅ Atomic validation in same transaction
+- ✅ State updated before swap
 
-**Mitigación Pendiente**:
-- ✅ **COMPLETAMENTE MITIGADO** (validación es atómica)
+**Pending Mitigation**:
+- ✅ **FULLY MITIGATED** (validation is atomic)
 
-#### 🟢 MEDIAS
+#### 🟢 MEDIUM
 
-##### 3.1 Dos via Block Gas Limit
-**Descripción**: Arrays grandes (supportedTokens) podrían causar out-of-gas.
+##### 3.1 DoS via Block Gas Limit
+**Description**: Large arrays (supportedTokens) could cause out-of-gas.
 
-**Impacto**: Funciones de lectura podrían fallar.
+**Impact**: Read functions could fail.
 
-**Mitigación Implementada**:
-- ✅ Límite de 50 tokens (MAX_SUPPORTED_TOKENS)
+**Implemented Mitigation**:
+- ✅ Limit of 50 tokens (MAX_SUPPORTED_TOKENS)
 
-**Mitigación Pendiente**:
-- ⚠️ Implementar paginación en getSupportedTokens()
+**Pending Mitigation**:
+- ⚠️ Implement pagination in getSupportedTokens()
 
-##### 3.2 Precision Loss en Conversiones
-**Descripción**: Conversiones de decimals podrían perder precisión.
+##### 3.2 Precision Loss in Conversions
+**Description**: Decimal conversions could lose precision.
 
-**Impacto**: Usuarios pierden pequeñas cantidades (dust).
+**Impact**: Users lose small amounts (dust).
 
-**Mitigación Implementada**:
-- ✅ USD con 6 decimales (alta precisión)
-- ✅ Validación de AmountTooSmall
+**Implemented Mitigation**:
+- ✅ USD with 6 decimals (high precision)
+- ✅ AmountTooSmall validation
 
-**Mitigación Pendiente**:
-- ⚠️ Implementar función para reclamar dust
+**Pending Mitigation**:
+- ⚠️ Implement function to claim dust
 
 ##### 3.3 Token with Fees on Transfer
-**Descripción**: Algunos tokens (ej. STA, PAXG) cobran fees en transferencias.
+**Description**: Some tokens (e.g. STA, PAXG) charge fees on transfers.
 
-**Impacto**: Balance recibido < balance esperado → revert en swap.
+**Impact**: Balance received < expected balance → revert on swap.
 
-**Mitigación Implementada**:
-- ❌ No implementada
+**Implemented Mitigation**:
+- ❌ Not implemented
 
-**Mitigación Pendiente**:
-- ⚠️ Blacklist de tokens con fees
-- ⚠️ O detectar balance real post-transfer
+**Pending Mitigation**:
+- ⚠️ Blacklist of tokens with fees
+- ⚠️ Or detect real balance post-transfer
 
-#### 🔵 BAJAS
+#### 🔵 LOW
 
-##### 4.1 Front-running de addToken
-**Descripción**: Manager podría agregar token malicioso antes de revisión.
+##### 4.1 Front-running of addToken
+**Description**: Manager could add malicious token before review.
 
-**Impacto**: Token malicioso en whitelist.
+**Impact**: Malicious token on whitelist.
 
-**Mitigación Implementada**:
-- ✅ Solo Manager role puede agregar tokens
-- ✅ Validación de decimals
+**Implemented Mitigation**:
+- ✅ Only Manager role can add tokens
+- ✅ Decimals validation
 
-**Mitigación Pendiente**:
-- ⚠️ Timelock de 24h para agregar tokens
-- ⚠️ Multisig para operaciones de Manager
-
----
-
-### 2. Matriz de Riesgos
-
-| Vulnerabilidad | Probabilidad | Impacto | Severidad | Estado |
-|----------------|--------------|---------|-----------|--------|
-| Oracle Manipulation | Baja | Crítico | 🔴 Alta | Parcialmente mitigado |
-| Slippage Attack | Media | Alto | 🟡 Media | Parcialmente mitigado |
-| Reentrancy | Baja | Crítico | ✅ Mitigado | Completamente mitigado |
-| Admin Key Compromise | Baja | Crítico | 🟡 Alta | Recomendado multisig |
-| Token Approval Front-run | Media | Medio | 🟢 Baja | Parcialmente mitigado |
-| Bank Cap Bypass | Muy Baja | Alto | ✅ Mitigado | Completamente mitigado |
-| DoS Gas Limit | Muy Baja | Bajo | 🟢 Baja | Mitigado |
-| Precision Loss | Media | Bajo | 🟢 Baja | Aceptable |
-| Tokens with Fees | Media | Medio | 🟡 Media | No mitigado |
+**Pending Mitigation**:
+- ⚠️ 24h timelock for adding tokens
+- ⚠️ Multisig for Manager operations
 
 ---
 
-### 3. Pasos Faltantes para Madurez de Producción
+### 2. Risk Matrix
 
-#### Antes de Mainnet Launch
+| Vulnerability | Probability | Impact | Severity | Status |
+|---------------|-------------|--------|----------|--------|
+| Oracle Manipulation | Low | Critical | 🔴 High | Partially mitigated |
+| Slippage Attack | Medium | High | 🟡 Medium | Partially mitigated |
+| Reentrancy | Low | Critical | ✅ Mitigated | Fully mitigated |
+| Admin Key Compromise | Low | Critical | 🟡 High | Multisig recommended |
+| Token Approval Front-run | Medium | Medium | 🟢 Low | Partially mitigated |
+| Bank Cap Bypass | Very Low | High | ✅ Mitigated | Fully mitigated |
+| DoS Gas Limit | Very Low | Low | 🟢 Low | Mitigated |
+| Precision Loss | Medium | Low | 🟢 Low | Acceptable |
+| Tokens with Fees | Medium | Medium | 🟡 Medium | Not mitigated |
 
-**Seguridad:**
-- [ ] Auditoría profesional por firma reconocida (OpenZeppelin, Trail of Bits, etc.)
-- [ ] Bug bounty program ($50k+ en ImmuneFi)
-- [ ] Implementar Multisig (Gnosis Safe) para admin
-- [ ] Timelock (24-48h) para operaciones críticas
-- [ ] Implementar circuit breaker para precios
-- [ ] Integrar Flashbots para protección MEV
+---
+
+### 3. Missing Steps for Production Maturity
+
+#### Before Mainnet Launch
+
+**Security:**
+- [ ] Professional audit by recognized firm (OpenZeppelin, Trail of Bits, etc.)
+- [ ] Bug bounty program ($50k+ on ImmuneFi)
+- [ ] Implement Multisig (Gnosis Safe) for admin
+- [ ] Timelock (24-48h) for critical operations
+- [ ] Implement circuit breaker for prices
+- [ ] Integrate Flashbots for MEV protection
 
 **Testing:**
-- [ ] Aumentar cobertura a >90%
-- [ ] Tests de integración con Uniswap V2 en fork de mainnet
-- [ ] Tests de stress (límites de gas, arrays grandes)
-- [ ] Fuzzing avanzado con Echidna/Medusa
-- [ ] Simulaciones de ataques (exploit tests)
+- [ ] Increase coverage to >90%
+- [ ] Integration tests with Uniswap V2 on mainnet fork
+- [ ] Stress tests (gas limits, large arrays)
+- [ ] Advanced fuzzing with Echidna/Medusa
+- [ ] Attack simulations (exploit tests)
 
-**Monitoreo:**
-- [ ] Integrar Tenderly para monitoring
-- [ ] Alertas automáticas (Slack/Discord) para eventos críticos
-- [ ] Dashboard público de métricas
-- [ ] Monitoreo de TVL (Total Value Locked)
+**Monitoring:**
+- [ ] Integrate Tenderly for monitoring
+- [ ] Automatic alerts (Slack/Discord) for critical events
+- [ ] Public metrics dashboard
+- [ ] TVL (Total Value Locked) monitoring
 
-**Operaciones:**
-- [ ] Documentación de procedimientos de emergencia
-- [ ] Runbooks para diferentes escenarios
-- [ ] Plan de respuesta a incidentes
-- [ ] Sistema de versionado y upgrades
+**Operations:**
+- [ ] Emergency procedure documentation
+- [ ] Runbooks for different scenarios
+- [ ] Incident response plan
+- [ ] Versioning and upgrade system
 
-#### Post-Launch (3-6 meses)
+#### Post-Launch (3-6 months)
 
-**Optimizaciones:**
-- [ ] Optimización de gas (EIP-1167 clones?)
-- [ ] Implementar proxy pattern para upgrades
-- [ ] Batch operations para múltiples depósitos
-- [ ] Meta-transactions (EIP-2771) para gasless UX
+**Optimizations:**
+- [ ] Gas optimization (EIP-1167 clones?)
+- [ ] Implement proxy pattern for upgrades
+- [ ] Batch operations for multiple deposits
+- [ ] Meta-transactions (EIP-2771) for gasless UX
 
 **Features:**
-- [ ] Soporte para Uniswap V3 (concentrado de liquidez)
+- [ ] Support for Uniswap V3 (concentrated liquidity)
 - [ ] Multi-chain deployment (Polygon, Arbitrum, etc.)
-- [ ] Yield farming con USDC depositado (Aave, Compound)
-- [ ] NFT receipts para depósitos
+- [ ] Yield farming with deposited USDC (Aave, Compound)
+- [ ] NFT receipts for deposits
 
 ---
 
-### 4. Métodos de Prueba Utilizados
+### 4. Testing Methods Used
 
-#### Testing Estratégico
+#### Strategic Testing
 
 1. **Unit Tests** (65+ tests)
-   - Prueba cada función individualmente
-   - Casos positivos y negativos
+   - Test each function individually
+   - Positive and negative cases
    - Edge cases
 
 2. **Integration Tests**
-   - Flujos completos end-to-end
-   - Múltiples usuarios interactuando
+   - Complete end-to-end flows
+   - Multiple users interacting
    - Swaps + deposits + withdrawals
 
 3. **Fuzz Tests**
-   - Propiedades invariantes
-   - Montos aleatorios
-   - Múltiples escenarios
+   - Invariant properties
+   - Random amounts
+   - Multiple scenarios
 
 4. **Mock Testing**
-   - Aislamiento de dependencias externas
-   - Control de comportamiento (exchange rate, precios)
-   - Reproducibilidad
+   - Isolation of external dependencies
+   - Behavior control (exchange rate, prices)
+   - Reproducibility
 
 #### Coverage Targets
 
@@ -758,7 +758,7 @@ src/KipuBankV3.sol
 └── Functions: >80%
 ```
 
-#### Tests Recomendados Adicionales
+#### Recommended Additional Tests
 
 ```bash
 # Fork testing (mainnet)
@@ -770,149 +770,149 @@ forge test --match-test invariant
 # Gas profiling
 forge test --gas-report
 
-# Mutation testing (requiere herramienta externa)
+# Mutation testing (requires external tool)
 vertigo run --sample-ratio 0.5
 ```
 
 ---
 
-## 🎨 Decisiones de Diseño
+## 🎨 Design Decisions
 
-### 1. Balance Unificado en USDC
+### 1. Unified Balance in USDC
 
-**Decisión**: Todos los depósitos se convierten a USDC, los usuarios solo tienen un balance en USDC.
+**Decision**: All deposits are converted to USDC, users only have one USDC balance.
 
-**Alternativas Consideradas**:
-- Multi-token balances (como V2)
-- Balance en ETH como unidad de cuenta
+**Alternatives Considered**:
+- Multi-token balances (like V2)
+- Balance in ETH as unit of account
 
-**Razones**:
-- ✅ **Simplicidad**: Frontend solo muestra un balance
-- ✅ **Estabilidad**: USDC es stablecoin (menos volatilidad)
-- ✅ **Gas Efficient**: Un solo storage slot por usuario
-- ✅ **UX**: Usuarios no necesitan entender qué token tienen
+**Reasons**:
+- ✅ **Simplicity**: Frontend only displays one balance
+- ✅ **Stability**: USDC is stablecoin (less volatility)
+- ✅ **Gas Efficient**: One storage slot per user
+- ✅ **UX**: Users don't need to understand which token they have
 
 **Trade-offs**:
-- ❌ Swap fees de Uniswap en cada depósito
-- ❌ Usuarios no pueden recuperar el token original
-- ❌ Exposición al riesgo de USDC (depeg, censura)
+- ❌ Uniswap swap fees on each deposit
+- ❌ Users can't recover original token
+- ❌ Exposure to USDC risk (depeg, censorship)
 
 ---
 
-### 2. Integración con Uniswap V2 (no V3)
+### 2. Uniswap V2 Integration (not V3)
 
-**Decisión**: Usar Uniswap V2 para swaps, no V3.
+**Decision**: Use Uniswap V2 for swaps, not V3.
 
-**Razones**:
-- ✅ **Simplicidad**: V2 es más simple (no ticks, no ranges)
-- ✅ **Documentación**: V2 está muy bien documentado
-- ✅ **Compatibilidad**: V2 sigue siendo ampliamente usado
-- ✅ **Gas**: V2 puede ser más barato para swaps pequeños
+**Reasons**:
+- ✅ **Simplicity**: V2 is simpler (no ticks, no ranges)
+- ✅ **Documentation**: V2 is very well documented
+- ✅ **Compatibility**: V2 is still widely used
+- ✅ **Gas**: V2 can be cheaper for small swaps
 
 **Trade-offs**:
-- ❌ Peor precio de ejecución vs V3
-- ❌ Menos liquidez concentrada
-- ❌ Tecnología "vieja" (2020)
+- ❌ Worse execution price vs V3
+- ❌ Less concentrated liquidity
+- ❌ "Old" technology (2020)
 
-**Futuro**: Migrar a Uniswap V3 en KipuBankV4 con mejor gestión de liquidez.
+**Future**: Migrate to Uniswap V3 in KipuBankV4 with better liquidity management.
 
 ---
 
-### 3. Slippage Configurable (no fijo)
+### 3. Configurable Slippage (not fixed)
 
-**Decisión**: Manager puede ajustar slippage tolerance.
+**Decision**: Manager can adjust slippage tolerance.
 
-**Razones**:
-- ✅ **Flexibilidad**: Ajustar según volatilidad del mercado
-- ✅ **Optimización**: Menor slippage cuando mercado está calmado
-- ✅ **Risk Management**: Aumentar si swaps están fallando
+**Reasons**:
+- ✅ **Flexibility**: Adjust according to market volatility
+- ✅ **Optimization**: Lower slippage when market is calm
+- ✅ **Risk Management**: Increase if swaps are failing
 
 **Trade-offs**:
-- ❌ Manager necesita monitorear activamente
-- ❌ Complejidad adicional
+- ❌ Manager needs to actively monitor
+- ❌ Additional complexity
 
-**Configuración Recomendada**:
-- Mercado normal: 0.5-1% (50-100 bps)
-- Alta volatilidad: 2-3% (200-300 bps)
+**Recommended Configuration**:
+- Normal market: 0.5-1% (50-100 bps)
+- High volatility: 2-3% (200-300 bps)
 
 ---
 
-### 4. Bank Cap en USD (no en USDC absoluto)
+### 4. Bank Cap in USD (not absolute USDC)
 
-**Decisión**: Bank cap se define en USD (6 decimals), no en cantidad de USDC.
+**Decision**: Bank cap is defined in USD (6 decimals), not in USDC amount.
 
-**Razones**:
-- ✅ **Claridad**: $1M es más intuitivo que 1000000 USDC
-- ✅ **Consistencia**: Todos los valores internos en USD
-- ✅ **Future-proof**: Si USDC depeg, el cap sigue siendo correcto en valor
+**Reasons**:
+- ✅ **Clarity**: $1M is more intuitive than 1000000 USDC
+- ✅ **Consistency**: All internal values in USD
+- ✅ **Future-proof**: If USDC depegs, cap is still correct in value
 
 **Trade-offs**:
-- ❌ Conversión adicional en código
+- ❌ Additional conversion in code
 
 ---
 
-### 5. Withdrawal Solo en USDC
+### 5. Withdrawal Only in USDC
 
-**Decisión**: Los usuarios solo pueden retirar USDC, no el token original depositado.
+**Decision**: Users can only withdraw USDC, not the original deposited token.
 
-**Razones**:
-- ✅ **Simplicidad**: No necesitamos hacer swap inverso
-- ✅ **Gas Efficiency**: Menos lógica de swap
-- ✅ **Seguridad**: Menos superficie de ataque
+**Reasons**:
+- ✅ **Simplicity**: No need for reverse swap
+- ✅ **Gas Efficiency**: Less swap logic
+- ✅ **Security**: Smaller attack surface
 
 **Trade-offs**:
-- ❌ Usuarios no pueden "recuperar" su token original
-- ❌ Menos flexible que V2
+- ❌ Users can't "recover" their original token
+- ❌ Less flexible than V2
 
-**Mitigación**: En V4 podríamos agregar función `withdrawAs(token)` que haga swap inverso.
+**Mitigation**: In V4 we could add `withdrawAs(token)` function that does reverse swap.
 
 ---
 
 ### 6. No Yield Farming (Yet)
 
-**Decisión**: USDC depositado no genera yield automáticamente.
+**Decision**: Deposited USDC doesn't automatically generate yield.
 
-**Razones**:
-- ✅ **Simplicidad**: V3 se enfoca en swap + storage
-- ✅ **Seguridad**: Menos integraciones = menor riesgo
-- ✅ **Gas**: Menos operaciones
+**Reasons**:
+- ✅ **Simplicity**: V3 focuses on swap + storage
+- ✅ **Security**: Fewer integrations = lower risk
+- ✅ **Gas**: Fewer operations
 
-**Futuro**: KipuBankV4 podría:
-- Depositar USDC en Aave/Compound
-- Generar yield para depositantes
-- Compartir yield (80% usuarios, 20% protocolo)
+**Future**: KipuBankV4 could:
+- Deposit USDC in Aave/Compound
+- Generate yield for depositors
+- Share yield (80% users, 20% protocol)
 
 ---
 
-### 7. Límite de 50 Tokens
+### 7. Limit of 50 Tokens
 
-**Decisión**: Máximo 50 tokens soportados (MAX_SUPPORTED_TOKENS).
+**Decision**: Maximum 50 supported tokens (MAX_SUPPORTED_TOKENS).
 
-**Razones**:
-- ✅ **DoS Prevention**: Evitar arrays infinitos
-- ✅ **Gas Limit**: getSupportedTokens() no explota
-- ✅ **Suficiente**: 50 tokens es mucho para un banco
+**Reasons**:
+- ✅ **DoS Prevention**: Avoid infinite arrays
+- ✅ **Gas Limit**: getSupportedTokens() doesn't explode
+- ✅ **Sufficient**: 50 tokens is a lot for a bank
 
 **Trade-offs**:
-- ❌ Límite arbitrario
-- ❌ Necesitarás remover tokens viejos para agregar nuevos
+- ❌ Arbitrary limit
+- ❌ Need to remove old tokens to add new ones
 
-**Alternativa**: Implementar paginación en lugar de límite.
+**Alternative**: Implement pagination instead of limit.
 
 ---
 
-### 8. Dos Roles: Admin y Manager
+### 8. Two Roles: Admin and Manager
 
-**Decisión**: Separar roles críticos (Admin) de configuración (Manager).
+**Decision**: Separate critical roles (Admin) from configuration (Manager).
 
-**Razones**:
-- ✅ **Seguridad**: Admin solo para emergencias
-- ✅ **Operaciones**: Manager puede ajustar parámetros sin riesgo crítico
-- ✅ **Gobernanza**: Fácil delegar Manager a DAO
+**Reasons**:
+- ✅ **Security**: Admin only for emergencies
+- ✅ **Operations**: Manager can adjust parameters without critical risk
+- ✅ **Governance**: Easy to delegate Manager to DAO
 
-**Distribución de Poder**:
+**Power Distribution**:
 
-| Acción | Admin | Manager |
+| Action | Admin | Manager |
 |--------|-------|---------|
 | pause/unpause | ✅ | ❌ |
 | emergencyWithdraw | ✅ | ❌ |
@@ -920,103 +920,103 @@ vertigo run --sample-ratio 0.5
 | setBankCap | ❌ | ✅ |
 | setSlippage | ❌ | ✅ |
 
-**Futuro**: Admin → Multisig, Manager → DAO voting.
+**Future**: Admin → Multisig, Manager → DAO voting.
 
 ---
 
-## 🔒 Auditoría y Seguridad
+## 🔒 Audit and Security
 
-### Checklist de Seguridad Pre-Auditoría
+### Pre-Audit Security Checklist
 
-#### Controles de Acceso
-- [x] Roles implementados correctamente (Admin, Manager)
-- [x] onlyRole usado en funciones sensibles
-- [x] Constructor asigna roles correctamente
-- [ ] Considerar Multisig para Admin
+#### Access Controls
+- [x] Roles implemented correctly (Admin, Manager)
+- [x] onlyRole used in sensitive functions
+- [x] Constructor assigns roles correctly
+- [ ] Consider Multisig for Admin
 
 #### Reentrancy
-- [x] ReentrancyGuard en todas las funciones state-changing
-- [x] CEI pattern implementado
-- [x] No hay llamadas externas antes de actualizar estado
+- [x] ReentrancyGuard on all state-changing functions
+- [x] CEI pattern implemented
+- [x] No external calls before updating state
 
-#### Validación de Inputs
-- [x] nonZeroAmount en depósitos/retiros
-- [x] nonZeroAddress en constructor y funciones
-- [x] Validación de decimals (1-18)
-- [x] Validación de slippage (<= 100%)
-- [x] Validación de bank cap y withdrawal limit
+#### Input Validation
+- [x] nonZeroAmount on deposits/withdrawals
+- [x] nonZeroAddress on constructor and functions
+- [x] Decimals validation (1-18)
+- [x] Slippage validation (<= 100%)
+- [x] Bank cap and withdrawal limit validation
 
-#### Oráculos
-- [x] Staleness check (< 1 hora)
+#### Oracles
+- [x] Staleness check (< 1 hour)
 - [x] roundId validation
-- [x] Precio mínimo válido
-- [ ] Considerar múltiples oráculos (TWAP)
+- [x] Minimum valid price
+- [ ] Consider multiple oracles (TWAP)
 
 #### Token Handling
-- [x] SafeERC20 para todas las transferencias
-- [x] forceApprove antes de swaps
-- [ ] Manejar tokens con fees on transfer
-- [ ] Blacklist de tokens maliciosos
+- [x] SafeERC20 for all transfers
+- [x] forceApprove before swaps
+- [ ] Handle tokens with fees on transfer
+- [ ] Blacklist malicious tokens
 
-#### Pausabilidad
-- [x] Pausable implementado
-- [x] whenNotPaused en funciones críticas
-- [x] Solo Admin puede pausar
-- [x] emergencyWithdraw disponible
+#### Pausability
+- [x] Pausable implemented
+- [x] whenNotPaused on critical functions
+- [x] Only Admin can pause
+- [x] emergencyWithdraw available
 
 #### Gas Optimization
 - [x] State variable caching
-- [x] Inmutables para valores constantes
+- [x] Immutables for constant values
 - [x] Custom errors (no strings)
 - [x] Struct packing
-- [ ] Considerar batch operations
+- [ ] Consider batch operations
 
-### Herramientas de Análisis Estático
+### Static Analysis Tools
 
 ```bash
-# Slither (análisis estático)
+# Slither (static analysis)
 pip install slither-analyzer
 slither src/KipuBankV3.sol
 
-# Mythril (análisis simbólico)
+# Mythril (symbolic analysis)
 pip install mythril
 myth analyze src/KipuBankV3.sol
 
-# Echidna (fuzzing avanzado)
+# Echidna (advanced fuzzing)
 echidna-test . --contract KipuBankV3 --config echidna.yaml
 ```
 
-### Auditorías Recomendadas
+### Recommended Audits
 
-1. **Code4rena** - Auditoría competitiva ($30-50k)
-2. **OpenZeppelin** - Auditoría premium ($50-100k)
-3. **Trail of Bits** - Auditoría de seguridad ($75-150k)
+1. **Code4rena** - Competitive audit ($30-50k)
+2. **OpenZeppelin** - Premium audit ($50-100k)
+3. **Trail of Bits** - Security audit ($75-150k)
 
 ---
 
 ## 🗺️ Roadmap
 
-### Q1 2025: MVP y Testing
-- [x] Implementar KipuBankV3 core
-- [x] Suite de tests completa (>50% coverage)
-- [x] Documentación completa
-- [ ] Deploy en testnet (Sepolia)
-- [ ] Frontend básico (React + Wagmi)
+### Q1 2025: MVP and Testing
+- [x] Implement KipuBankV3 core
+- [x] Complete test suite (>50% coverage)
+- [x] Complete documentation
+- [ ] Deploy on testnet (Sepolia)
+- [ ] Basic frontend (React + Wagmi)
 
-### Q2 2025: Auditoría y Optimización
-- [ ] Auditoría profesional
+### Q2 2025: Audit and Optimization
+- [ ] Professional audit
 - [ ] Bug bounty program
-- [ ] Optimizaciones de gas
-- [ ] Aumentar coverage a >90%
-- [ ] Deploy en mainnet (beta)
+- [ ] Gas optimizations
+- [ ] Increase coverage to >90%
+- [ ] Deploy on mainnet (beta)
 
-### Q3 2025: Features Avanzadas
-- [ ] Integrar Uniswap V3
+### Q3 2025: Advanced Features
+- [ ] Integrate Uniswap V3
 - [ ] Yield farming (Aave/Compound)
 - [ ] Multi-chain (Polygon, Arbitrum)
-- [ ] Gobernanza DAO
+- [ ] DAO governance
 
-### Q4 2025: Escalabilidad
+### Q4 2025: Scalability
 - [ ] L2 optimization
 - [ ] Batch operations
 - [ ] Meta-transactions
@@ -1024,32 +1024,34 @@ echidna-test . --contract KipuBankV3 --config echidna.yaml
 
 ---
 
-## 📞 Contacto y Soporte
+## 📞 Contact and Support
 
-- **GitHub**: [https://github.com/your-username/KipuBankV3](https://github.com/your-username/KipuBankV3)
-- **Email**: support@kipubank.io
-- **Discord**: [https://discord.gg/kipubank](https://discord.gg/kipubank)
-- **Twitter**: [@KipuBank](https://twitter.com/kipubank)
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detalles.
+- **Author**: Hernan Herrera
+- **Organization**: White Paper
+- **Email**: hernanherrera@whitepaper.com
+- **Support**: support@whitepaper.com
+- **Security**: security@whitepaper.com
 
 ---
 
-## 🙏 Agradecimientos
+## 📄 License
 
-- **Kipu Team** - Por el examen y la oportunidad
-- **Uniswap** - Por el protocolo de swaps
-- **Chainlink** - Por los oráculos de precios
-- **OpenZeppelin** - Por las librerías de seguridad
-- **Foundry** - Por las herramientas de desarrollo
+This project is under the MIT license. See [LICENSE](LICENSE) for more details.
 
 ---
 
-## 📚 Referencias
+## 🙏 Acknowledgments
+
+- **White Paper** - Development organization
+- **Hernan Herrera** - Lead Developer
+- **Uniswap** - For the swap protocol
+- **Chainlink** - For price oracles
+- **OpenZeppelin** - For security libraries
+- **Foundry** - For development tools
+
+---
+
+## 📚 References
 
 1. [Uniswap V2 Documentation](https://docs.uniswap.org/contracts/v2/overview)
 2. [Chainlink Price Feeds](https://docs.chain.link/data-feeds)
@@ -1059,4 +1061,4 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 
 ---
 
-**⚠️ DISCLAIMER**: Este contrato es para propósitos educativos. No ha sido auditado profesionalmente. No usar en producción con fondos reales sin una auditoría completa.
+**⚠️ DISCLAIMER**: This contract is for educational purposes. It has not been professionally audited. Do not use in production with real funds without a complete audit.

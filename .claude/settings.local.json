@@ -3,7 +3,9 @@
     "allow": [
       "Bash(dir /s /b)",
       "Bash(forge init:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(wsl -e bash -c \"cd /mnt/c/Users/herna/OneDrive/proyects/KipuBankV3 && forge test --gas-report\")",
+      "Bash(wsl -e bash -c \"cd /mnt/c/Users/herna/OneDrive/proyects/KipuBankV3 && ls -la\")"
     ],
     "deny": [],
     "ask": []

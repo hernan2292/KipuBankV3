@@ -69,12 +69,15 @@ contract KipuBankV3 is
     uint256 public constant MAX_BPS = 10000;
 
     /// @notice Chainlink ETH/USD price feed
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     AggregatorV3Interface public immutable ethUsdPriceFeed;
 
     /// @notice Uniswap V2 Router for token swaps
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     IUniswapV2Router02 public immutable uniswapRouter;
 
     /// @notice USDC token address
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     address public immutable usdc;
 
     /// @notice Maximum total value the bank can hold (6 decimals)
@@ -105,7 +108,7 @@ contract KipuBankV3 is
      * @param amount The amount to check
      */
     modifier nonZeroAmount(uint256 amount) {
-        if (amount == 0) revert ZeroAmount();
+        _nonZeroAmount(amount);
         _;
     }
 
@@ -114,7 +117,7 @@ contract KipuBankV3 is
      * @param addr The address to check
      */
     modifier nonZeroAddress(address addr) {
-        if (addr == address(0)) revert ZeroAddress();
+        _nonZeroAddress(addr);
         _;
     }
 
@@ -263,8 +266,11 @@ contract KipuBankV3 is
         // Update token statistics (single write to storage)
         unchecked {
             // Safe: totalDeposits can't realistically overflow uint128
-            // depositCount won't overflow uint64 in any realistic scenario
+            // Casting to uint128 is safe because USDC has 6 decimals, max bank cap is ~1e12,
+            // which fits comfortably in uint128 (max ~3.4e38)
+            // forge-lint: disable-next-line(unsafe-typecast)
             tokenInfo[NATIVE_TOKEN].totalDeposits = nativeTokenInfo.totalDeposits + uint128(usdcReceived);
+            // depositCount won't overflow uint64 in any realistic scenario
             tokenInfo[NATIVE_TOKEN].depositCount = nativeTokenInfo.depositCount + 1;
         }
 
@@ -309,9 +315,8 @@ contract KipuBankV3 is
         nonReentrant
         whenNotPaused
         nonZeroAmount(amount)
-        nonZeroAddress(token)
     {
-        // Validate token is not native ETH
+        // Validate token is not native ETH (address(0))
         if (token == NATIVE_TOKEN) revert TokenNotSupported();
 
         // Cache token info (single read of storage struct)
@@ -396,8 +401,11 @@ contract KipuBankV3 is
         // Update token statistics (single write to storage)
         unchecked {
             // Safe: totalDeposits can't realistically overflow uint128
-            // depositCount won't overflow uint64 in any realistic scenario
+            // Casting to uint128 is safe because USDC has 6 decimals, max bank cap is ~1e12,
+            // which fits comfortably in uint128 (max ~3.4e38)
+            // forge-lint: disable-next-line(unsafe-typecast)
             tokenInfo[token].totalDeposits = info.totalDeposits + uint128(usdcAmount);
+            // depositCount won't overflow uint64 in any realistic scenario
             tokenInfo[token].depositCount = info.depositCount + 1;
         }
 
@@ -798,9 +806,27 @@ contract KipuBankV3 is
         // Validate price is positive
         if (answer <= 0) revert InvalidPrice();
 
+        // Casting to uint256 is safe because we validated answer > 0 above
+        // forge-lint: disable-next-line(unsafe-typecast)
         price = uint256(answer);
 
         // Validate price is above minimum ($1)
         if (price < MIN_VALID_PRICE) revert InvalidPrice();
+    }
+
+    /**
+     * @notice Internal function to validate amount is not zero
+     * @param amount The amount to check
+     */
+    function _nonZeroAmount(uint256 amount) internal pure {
+        if (amount == 0) revert ZeroAmount();
+    }
+
+    /**
+     * @notice Internal function to validate address is not zero
+     * @param addr The address to check
+     */
+    function _nonZeroAddress(address addr) internal pure {
+        if (addr == address(0)) revert ZeroAddress();
     }
 }

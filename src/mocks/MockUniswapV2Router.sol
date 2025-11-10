@@ -55,6 +55,13 @@ contract MockUniswapV2Router {
         // Calculate output amount based on exchange rate
         uint256 amountOut = (amountIn * exchangeRate) / 10000;
 
+        // If swapping from 18 decimal token (like DAI) to 6 decimal token (USDC)
+        // we need to adjust decimals
+        if (tokenIn != WETH && tokenOut != WETH) {
+            // Token-to-token swap, assume DAI (18 decimals) -> USDC (6 decimals)
+            amountOut = amountOut / 1e12;
+        }
+
         require(amountOut >= amountOutMin, "Insufficient output amount");
 
         // Mint or transfer output tokens to recipient
@@ -83,8 +90,13 @@ contract MockUniswapV2Router {
         address tokenOut = path[1];
 
         // Calculate output amount based on exchange rate
-        // For ETH swaps, we simulate the conversion
+        // For ETH->USDC: 1 ETH (18 decimals) -> $3000 USDC (6 decimals)
+        // exchangeRate = 10000 means 1:1 price, but we need to adjust for decimals
+        // If ETH = $3000, then 1e18 ETH -> 3000e6 USDC
+        // amountOut = (msg.value / 1e18) * 3000 * 1e6 = msg.value * 3000 / 1e12
         uint256 amountOut = (msg.value * exchangeRate) / 10000;
+        // Adjust for decimal difference (ETH 18 decimals -> USDC 6 decimals)
+        amountOut = amountOut / 1e12;
 
         require(amountOut >= amountOutMin, "Insufficient output amount");
 
@@ -106,9 +118,17 @@ contract MockUniswapV2Router {
     ) external view returns (uint256[] memory amounts) {
         require(path.length == 2, "Invalid path");
 
+        uint256 amountOut = (amountIn * exchangeRate) / 10000;
+
+        // Check if we're swapping from a token with different decimals
+        // For any 18-decimal token (WETH, DAI, etc.) to 6-decimal token (USDC)
+        // we need to adjust decimals
+        // This applies to both WETH->USDC and token->token swaps where output is USDC
+        amountOut = amountOut / 1e12;
+
         amounts = new uint256[](2);
         amounts[0] = amountIn;
-        amounts[1] = (amountIn * exchangeRate) / 10000;
+        amounts[1] = amountOut;
     }
 
     /**

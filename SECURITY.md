@@ -12,10 +12,15 @@ We take the security of KipuBankV3 seriously. If you discover a security vulnera
 
 ### DO
 
-- ✅ Email us at **security@kipubank.io** with details
+- ✅ Email us at **security@whitepaper.com** with details
 - ✅ Provide a clear description and steps to reproduce
 - ✅ Allow us reasonable time to fix before public disclosure (typically 90 days)
 - ✅ Work with us to verify the fix
+
+**Contact Information:**
+- **Security Email**: security@whitepaper.com
+- **Developer**: Hernan Herrera (hernanherrera@whitepaper.com)
+- **Organization**: White Paper
 
 ## 🎁 Bug Bounty Program
 
@@ -90,9 +95,10 @@ We offer rewards for responsible disclosure of security vulnerabilities:
 
 ## 📞 Contact
 
-- **Security Email**: security@kipubank.io
-- **PGP Key**: [Download Here](https://kipubank.io/pgp-key.asc)
-- **Discord**: https://discord.gg/kipubank (Security channel)
+- **Security Email**: security@whitepaper.com
+- **Developer**: Hernan Herrera (hernanherrera@whitepaper.com)
+- **Organization**: White Paper
+- **Support**: support@whitepaper.com
 
 ## 🕒 Response Timeline
 

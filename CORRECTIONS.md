@@ -1,5 +1,9 @@
 # Correcciones Realizadas - KipuBankV3
 
+**Autor**: Hernan Herrera
+**Organización**: White Paper
+**Fecha**: 2025-11-09
+
 Este documento detalla todas las correcciones realizadas basadas en el feedback del trabajo anterior (KipuBankV2).
 
 ---

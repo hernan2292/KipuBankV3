@@ -1,54 +1,54 @@
 # Quick Start Guide - KipuBankV3
 
-Esta guía te llevará desde cero hasta tener KipuBankV3 funcionando en 5 minutos.
+This guide will take you from zero to having KipuBankV3 running in 5 minutes.
 
-## ⚡ Setup Rápido (5 minutos)
+## ⚡ Quick Setup (5 minutes)
 
-### 1. Prerequisitos
+### 1. Prerequisites
 
 ```bash
-# Verificar que tienes git
+# Verify you have git
 git --version
 
-# Instalar Foundry (si no lo tienes)
+# Install Foundry (if you don't have it)
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 ```
 
-### 2. Clonar e Instalar
+### 2. Clone and Install
 
 ```bash
-# Clonar
+# Clone
 git clone https://github.com/your-username/KipuBankV3.git
 cd KipuBankV3
 
-# Instalar dependencias
+# Install dependencies
 make install
 
-# Compilar
+# Compile
 make build
 ```
 
-### 3. Ejecutar Tests
+### 3. Run Tests
 
 ```bash
-# Correr todos los tests
+# Run all tests
 make test
 
-# Ver output detallado
+# View detailed output
 make test-v
 ```
 
-**✅ Si todos los tests pasan, estás listo!**
+**✅ If all tests pass, you're ready!**
 
 ---
 
-## 🎯 Uso Básico
+## 🎯 Basic Usage
 
-### Opción 1: Deploy Local (Anvil)
+### Option 1: Local Deploy (Anvil)
 
 ```bash
-# Terminal 1: Iniciar nodo local
+# Terminal 1: Start local node
 anvil
 
 # Terminal 2: Deploy
@@ -58,14 +58,14 @@ forge script script/DeployKipuBankV3.s.sol:DeployKipuBankV3 \
   --broadcast
 ```
 
-### Opción 2: Deploy Testnet (Sepolia)
+### Option 2: Testnet Deploy (Sepolia)
 
 ```bash
-# 1. Configurar .env
+# 1. Configure .env
 cp .env.example .env
-nano .env  # Agregar tus API keys
+nano .env  # Add your API keys
 
-# 2. Obtener ETH de testnet
+# 2. Get testnet ETH
 # https://sepoliafaucet.com/
 
 # 3. Deploy
@@ -74,29 +74,29 @@ make deploy-sepolia
 
 ---
 
-## 💡 Ejemplos Comunes
+## 💡 Common Examples
 
-### Depositar ETH
+### Deposit ETH
 
 ```bash
-# Depositar 0.1 ETH
+# Deposit 0.1 ETH
 cast send <CONTRACT_ADDRESS> "depositETH()" \
   --value 0.1ether \
   --private-key $PRIVATE_KEY \
   --rpc-url $RPC_URL
 ```
 
-### Depositar USDC
+### Deposit USDC
 
 ```bash
-# 1. Aprobar USDC
+# 1. Approve USDC
 cast send <USDC_ADDRESS> "approve(address,uint256)" \
   <CONTRACT_ADDRESS> \
   1000000000 \
   --private-key $PRIVATE_KEY \
   --rpc-url $RPC_URL
 
-# 2. Depositar 1000 USDC
+# 2. Deposit 1000 USDC
 cast send <CONTRACT_ADDRESS> "depositToken(address,uint256)" \
   <USDC_ADDRESS> \
   1000000000 \
@@ -104,7 +104,7 @@ cast send <CONTRACT_ADDRESS> "depositToken(address,uint256)" \
   --rpc-url $RPC_URL
 ```
 
-### Consultar Balance
+### Check Balance
 
 ```bash
 cast call <CONTRACT_ADDRESS> "getBalance(address)(uint256)" \
@@ -112,7 +112,7 @@ cast call <CONTRACT_ADDRESS> "getBalance(address)(uint256)" \
   --rpc-url $RPC_URL
 ```
 
-### Retirar USDC
+### Withdraw USDC
 
 ```bash
 cast send <CONTRACT_ADDRESS> "withdraw(uint256)" \
@@ -123,36 +123,36 @@ cast send <CONTRACT_ADDRESS> "withdraw(uint256)" \
 
 ---
 
-## 🔍 Explorar el Código
+## 🔍 Explore the Code
 
-### Estructura del Proyecto
+### Project Structure
 
 ```
 KipuBankV3/
 ├── src/
-│   ├── KipuBankV3.sol           ← Contrato principal
+│   ├── KipuBankV3.sol           ← Main contract
 │   ├── interfaces/
-│   │   ├── IKipuBankV3.sol      ← Interface principal
+│   │   ├── IKipuBankV3.sol      ← Main interface
 │   │   └── IUniswapV2Router02.sol
-│   └── mocks/                   ← Mocks para testing
+│   └── mocks/                   ← Mocks for testing
 ├── test/
-│   └── KipuBankV3.t.sol         ← Suite de tests (65+ tests)
+│   └── KipuBankV3.t.sol         ← Test suite (65+ tests)
 ├── script/
-│   └── DeployKipuBankV3.s.sol   ← Script de deployment
-├── foundry.toml                  ← Configuración Foundry
-├── README.md                     ← Documentación completa
-├── DEPLOYMENT.md                 ← Guía de deployment
-└── SECURITY.md                   ← Política de seguridad
+│   └── DeployKipuBankV3.s.sol   ← Deployment script
+├── foundry.toml                  ← Foundry configuration
+├── README.md                     ← Complete documentation
+├── DEPLOYMENT.md                 ← Deployment guide
+└── SECURITY.md                   ← Security policy
 ```
 
-### Funciones Principales
+### Main Functions
 
 ```solidity
-// Depósitos
+// Deposits
 function depositETH() external payable
 function depositToken(address token, uint256 amount) external
 
-// Retiros
+// Withdrawals
 function withdraw(uint256 amount) external
 
 // Manager
@@ -173,28 +173,28 @@ function getExpectedUSDC(address tokenIn, uint256 amountIn) external view return
 
 ---
 
-## 🧪 Testing Avanzado
+## 🧪 Advanced Testing
 
-### Tests Específicos
+### Specific Tests
 
 ```bash
-# Solo tests de depósitos
+# Only deposit tests
 make test-DepositETH
 
-# Solo tests de manager
+# Only manager tests
 forge test --match-test test_AddToken
 
 # Fuzz tests
 forge test --match-test testFuzz
 ```
 
-### Cobertura
+### Coverage
 
 ```bash
-# Ver cobertura
+# View coverage
 make coverage
 
-# Generar reporte HTML
+# Generate HTML report
 forge coverage --report lcov
 genhtml lcov.info --output-directory coverage
 open coverage/index.html
@@ -203,52 +203,53 @@ open coverage/index.html
 ### Fork Testing
 
 ```bash
-# Test contra mainnet real
+# Test against real mainnet
 forge test --fork-url $MAINNET_RPC_URL --match-test test_Integration
 ```
 
 ---
 
-## 📚 Próximos Pasos
+## 📚 Next Steps
 
-1. **Leer Documentación Completa**: [README.md](README.md)
-2. **Entender Arquitectura**: Ver diagrama de flujo en README
-3. **Revisar Tests**: [test/KipuBankV3.t.sol](test/KipuBankV3.t.sol)
-4. **Deploy en Testnet**: [DEPLOYMENT.md](DEPLOYMENT.md)
-5. **Contribuir**: [CONTRIBUTING.md](CONTRIBUTING.md)
+1. **Read Complete Documentation**: [README.md](README.md)
+2. **Understand Architecture**: See flow diagram in README
+3. **Review Tests**: [test/KipuBankV3.t.sol](test/KipuBankV3.t.sol)
+4. **Deploy on Testnet**: [DEPLOYMENT.md](DEPLOYMENT.md)
+5. **Contribute**: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
 ## ❓ FAQ
 
-### ¿Por qué usar Uniswap V2 y no V3?
-V2 es más simple para este caso de uso. V3 se considerará en futuras versiones.
+### Why use Uniswap V2 instead of V3?
+V2 is simpler for this use case. V3 will be considered in future versions.
 
-### ¿Los usuarios pueden recuperar el token original?
-No, todos los depósitos se convierten a USDC. Los retiros son solo en USDC.
+### Can users recover the original token?
+No, all deposits are converted to USDC. Withdrawals are USDC only.
 
-### ¿Qué pasa si USDC pierde su peg?
-El contrato tiene función `pause()` para emergencias. En el futuro se soportarán múltiples stablecoins.
+### What happens if USDC loses its peg?
+The contract has a `pause()` function for emergencies. Multiple stablecoins will be supported in the future.
 
-### ¿Cuánto gas cuesta un depósito con swap?
-Aproximadamente 150k-250k gas (depende de la ruta de swap). ETH directo es más barato que tokens ERC20.
+### How much gas does a deposit with swap cost?
+Approximately 150k-250k gas (depends on swap route). Direct ETH is cheaper than ERC20 tokens.
 
-### ¿Es seguro para producción?
-**NO** sin auditoría profesional. Esto es un proyecto educativo. Ver [SECURITY.md](SECURITY.md).
-
----
-
-## 🆘 Ayuda
-
-- **Documentación**: [README.md](README.md)
-- **Issues**: https://github.com/your-username/KipuBankV3/issues
-- **Discord**: https://discord.gg/kipubank
-- **Email**: support@kipubank.io
+### Is it safe for production?
+**NO** without professional audit. This is an educational project. See [SECURITY.md](SECURITY.md).
 
 ---
 
-## 🎉 ¡Listo!
+## 🆘 Help
 
-Ya tienes todo para empezar a usar y desarrollar con KipuBankV3.
+- **Documentation**: [README.md](README.md)
+- **Support**: support@whitepaper.com
+- **Security**: security@whitepaper.com
+- **Developer**: Hernan Herrera (hernanherrera@whitepaper.com)
+- **Organization**: White Paper
+
+---
+
+## 🎉 Ready!
+
+You now have everything to start using and developing with KipuBankV3.
 
 **Happy coding!** 🚀

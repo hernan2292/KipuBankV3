@@ -1,5 +1,9 @@
 # Guía de Testing - KipuBankV3
 
+**Autor**: Hernan Herrera
+**Organización**: White Paper
+**Fecha**: 2025-11-09
+
 Esta guía te ayudará a ejecutar todos los tests y análisis de gas del proyecto.
 
 ---

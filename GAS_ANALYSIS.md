@@ -537,3 +537,5 @@ forge test --gas-report --no-optimizer
 **Versión del contrato:** KipuBankV3 v1.0.0
 **Solidity:** 0.8.30
 **Optimizer:** Enabled (200 runs)
+**Autor**: Hernan Herrera
+**Organización**: White Paper

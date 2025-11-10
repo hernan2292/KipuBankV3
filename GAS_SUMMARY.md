@@ -3,6 +3,8 @@
 **Versión:** 1.0.0
 **Fecha:** 2025-11-09
 **Solidity:** 0.8.30 (Optimizer: 200 runs)
+**Autor**: Hernan Herrera
+**Organización**: White Paper
 
 ---
 
